@@ -1,0 +1,128 @@
+package cn.EGGMaster.core;
+
+import java.util.Locale;
+
+import cn.EGGMaster.tcpip.CommonMethods;
+
+
+public class HttpHostHeaderParser {
+    public static boolean isSSL;
+
+    public static String parseHost(byte[] buffer, int offset, int count) {
+        try {
+            isSSL = false;
+            switch (buffer[offset]) {
+                case 'H'://HEAD
+                case 'D'://DELETE
+                case 'O'://OPTIONS
+                case 'T'://TRACE
+                case 'C'://CONNECT
+                    isSSL = true;
+                case 'G'://GET
+                case 'P'://POST,PUT
+                    return getHttpHost(buffer, offset, count);
+                case 0x16://SSL
+                    isSSL = true;
+                    return getSNI(buffer, offset, count);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            //LocalVpnService.Instance.writeLog("Error: parseHost:%s", e);
+        }
+        return null;
+    }
+
+//    public static boolean isSSL(byte[] buffer, int offset, int count) {
+//        try {
+//            switch (buffer[offset]) {
+//                case (byte) 67: //C
+//                case (byte) 68: //D
+//                case (byte) 71: //G
+//                case (byte) 72: //H
+//                case (byte) 79: //O
+//                case (byte) 80: //P
+//                case (byte) 84: //T
+//                    return false;
+//                default:
+//                    return true;
+//            }
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+
+    static String getHttpHost(byte[] buffer, int offset, int count) {
+        String headerString = new String(buffer, offset, count);
+        String[] headerLines = headerString.split("\\r\\n");
+        String requestLine = headerLines[0];
+        if (requestLine.startsWith("GET") || requestLine.startsWith("POST")) {
+            for (int i = 1; i < headerLines.length; i++) {
+                String[] nameValueStrings = headerLines[i].split(":");
+                if (nameValueStrings.length == 2) {
+                    String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
+                    if ("host".equals(name)) {
+                        return nameValueStrings[1].trim();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    static String getSNI(byte[] buffer, int offset, int count) {
+        int limit = offset + count;
+        if (count > 43 && buffer[offset] == 0x16) {//TLS Client Hello
+            offset += 43;//skip 43 bytes header
+
+            //read sessionID:
+            if (offset + 1 > limit) return null;
+            int sessionIDLength = buffer[offset++] & 0xFF;
+            offset += sessionIDLength;
+
+            //read cipher suites:
+            if (offset + 2 > limit) return null;
+            int cipherSuitesLength = CommonMethods.readShort(buffer, offset) & 0xFFFF;
+            offset += 2;
+            offset += cipherSuitesLength;
+
+            //read Compression method:
+            if (offset + 1 > limit) return null;
+            int compressionMethodLength = buffer[offset++] & 0xFF;
+            offset += compressionMethodLength;
+
+            if (offset == limit) {
+                return null;
+            }
+
+            //read Extensions:
+            if (offset + 2 > limit) return null;
+            int extensionsLength = CommonMethods.readShort(buffer, offset) & 0xFFFF;
+            offset += 2;
+
+            if (offset + extensionsLength > limit) {
+                //System.err.println("TLS Client Hello packet is incomplete.");
+                return null;
+            }
+
+            while (offset + 4 <= limit) {
+                int type0 = buffer[offset++] & 0xFF;
+                int type1 = buffer[offset++] & 0xFF;
+                int length = CommonMethods.readShort(buffer, offset) & 0xFFFF;
+                offset += 2;
+
+                if (type0 == 0x00 && type1 == 0x00 && length > 5) { //have SNI
+                    offset += 5;//skip SNI header.
+                    length -= 5;//SNI size;
+                    if (offset + length > limit) return null;
+                    String serverName = new String(buffer, offset, length);
+                    return serverName;
+                } else {
+                    offset += length;
+                }
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+}

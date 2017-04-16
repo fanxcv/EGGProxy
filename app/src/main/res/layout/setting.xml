@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/Dns_Text"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dns_set_text"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/Dns_Set"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/dns_set"
+        android:text="@string/default_dns" />
+
+    <TextView
+        android:id="@+id/NoNeed_Text"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/NoNeed_text"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/NoNeed_Set"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/NoNeed_set" />
+
+    <Button
+        android:id="@+id/save_Setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/save" />
+
+</LinearLayout>

@@ -20,7 +20,7 @@
         <activity
             android:name=".ui.WelComeActivity"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:theme="@style/AppTheme.NoAction">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -45,9 +45,11 @@ public class HttpConnectTunnel extends Tunnel {
         String format = Configer.instance.https_first
                 .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[V\\]", "HTTP/1.1")
-                .replaceAll("\\[H\\]", this.m_DestAddress.getHostName())
+                //.replaceAll("\\[H\\]", this.m_DestAddress.getHostName())
+                .replaceAll("\\[H\\]", this.m_DestAddress.toString().replace("/",""))
                 .replaceAll("\\[U\\]", "/")
-                + "Proxy-Connection: keep-alive\r\n\r\n";
+                + "Proxy-Connection: keep-alive\r\n"
+                + "\r\n";
         byteBuffer.clear();
         byteBuffer.put(format.getBytes());
         byteBuffer.flip();

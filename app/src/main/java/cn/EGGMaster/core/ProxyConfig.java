@@ -19,14 +19,14 @@ public class ProxyConfig {
 
     //Timer m_Timer;
 
-    public class IPAddress {
+   /* public class IPAddress {
         public final String Address;
         public final int PrefixLength;
 
         public IPAddress(String address, int prefixLength) {
             this.Address = address;
             this.PrefixLength = prefixLength;
-        }
+        }*/
 
         /*public IPAddress(String ipAddresString) {
             String[] arrStrings = ipAddresString.split("/");
@@ -38,7 +38,7 @@ public class ProxyConfig {
             this.Address = address;
             this.PrefixLength = prefixLength;
         }*/
-    }
+   // }
 
     public ProxyConfig() {
         //m_ProxyList = new ArrayList<Config>();
@@ -120,7 +120,7 @@ public class ProxyConfig {
         if (host != null) {
             Boolean stateBoolean = getDomainState(host);
             if (stateBoolean != null) {
-                return stateBoolean.booleanValue();
+                return stateBoolean;
             }
         }
         return isFakeIP(ip);

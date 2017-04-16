@@ -1,9 +1,13 @@
 package cn.EGGMaster.core;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,54 +52,56 @@ public class Configer {
         if (isEmpty(conf)) {
             return false;
         }
-        String[] lines = conf.split(";");
-        for (String line : lines) {
-            if (!line.startsWith("#")) {
-                String[] params = line.split("=");
-                if (params.length == 2)
-                    switch (params[0].toLowerCase(Locale.ENGLISH).trim()) {
-                        case "mode":
-                            mode = formatString(params[1]);
-                            break;
-                        case "http_ip":
-                            http_ip = formatString(params[1]);
-                            break;
-                        case "http_port":
-                            http_port = formatString(params[1]);
-                            break;
-                        case "http_del":
-                            http_del = formatString(params[1]).split(",");
-                            break;
-                        case "http_first":
-                            http_first = formatString(params[1])
-                                    .replaceAll("\\[version\\]", "\\[V\\]")
-                                    .replaceAll("\\[method\\]", "\\[M\\]")
-                                    .replaceAll("\\[host\\]", "\\[H\\]")
-                                    .replaceAll("\\[uri\\]", "\\[U\\]")
-                                    .replaceAll("\\\\r", "\r")
-                                    .replaceAll("\\\\n", "\n")
-                                    .replaceAll("\\\\t", "\t");
-                            break;
-                        case "https_ip":
-                            https_ip = formatString(params[1]);
-                            break;
-                        case "https_port":
-                            https_port = formatString(params[1]);
-                            break;
-                        case "https_first":
-                            https_first = formatString(params[1])
-                                    .replaceAll("\\[version\\]", "\\[V\\]")
-                                    .replaceAll("\\[method\\]", "\\[M\\]")
-                                    .replaceAll("\\[host\\]", "\\[H\\]")
-                                    .replaceAll("\\[uri\\]", "\\[U\\]")
-                                    .replaceAll("\\\\r", "\r")
-                                    .replaceAll("\\\\n", "\n")
-                                    .replaceAll("\\\\t", "\t");
-                            break;
-                    }
-            }
+
+        Properties prof = new Properties();
+        try {
+            prof.load(new StringReader(conf));
+        } catch (IOException e) {
+            return false;
         }
 
+        Enumeration<?> enumeration = prof.propertyNames();
+        while (enumeration.hasMoreElements()){
+            String key = ((String) enumeration.nextElement()).trim();
+            String val = prof.getProperty(key,"").trim();
+/*
+            if (val.endsWith(";"))
+                val = val.substring(0,val.length()-1);
+            if (val.startsWith("\""))
+                val = val.substring(1,val.length()-2);*/
+           /* if (val.endsWith("\""))
+                val = val.substring(0,val.length()-1);*/
+
+            if (val.length()>0 && key.length()>0){
+                switch (key.toLowerCase()){
+
+                    case "mode":
+                        mode = formatString(val);
+                        break;
+                    case "http_ip":
+                        http_ip = formatString(val);
+                        break;
+                    case "http_port":
+                        http_port = formatString(val);
+                        break;
+                    case "http_del":
+                        http_del = formatString(val).split(",");
+                        break;
+                    case "http_first":
+                        http_first = genericFirstLine(formatString(val));
+                        break;
+                    case "https_ip":
+                        https_ip = formatString(val);
+                        break;
+                    case "https_port":
+                        https_port = formatString(val);
+                        break;
+                    case "https_first":
+                        https_first = genericFirstLine(formatString(val));
+                        break;
+                }
+            }
+        }
         if ("net".equals(mode))
             isNet = true;
 
@@ -109,7 +115,7 @@ public class Configer {
             noProxyList.add(https_ip);
             httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
-        if (isEmpty(http_first) && isEmpty(https_first))
+        if (isEmpty(http_first) || isEmpty(https_first))
             return false;
         return true;
     }
@@ -117,7 +123,7 @@ public class Configer {
     private String formatString(String str) {
         if (isEmpty(str))
             return "";
-        str = str.trim();
+        /*str = str.trim();
         if (!isEmpty(str)) {
             String regex = "\"?([^\"]*)\"?;?$";
             Pattern patter = Pattern.compile(regex);
@@ -125,8 +131,26 @@ public class Configer {
             if (matcher.find()) {
                 str = matcher.group(1);
             }
-        }
+        }*/
+
+        if (str.endsWith(";"))
+            str = str.substring(0,str.length()-1);
+        if (str.startsWith("\""))
+            str = str.substring(1,str.length());
+        if (str.endsWith("\""))
+            str = str.substring(0,str.length()-1);
         return str == null ? "" : str;
+    }
+
+    private String genericFirstLine(String str)
+    {
+        return str.replaceAll("\\[version\\]", "\\[V\\]")
+            .replaceAll("\\[method\\]", "\\[M\\]")
+            .replaceAll("\\[host\\]", "\\[H\\]")
+            .replaceAll("\\[uri\\]", "\\[U\\]")
+            .replaceAll("\\\\r", "\r")
+            .replaceAll("\\\\n", "\n")
+            .replaceAll("\\\\t", "\t");
     }
 
     @Override

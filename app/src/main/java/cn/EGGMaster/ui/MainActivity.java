@@ -77,10 +77,11 @@ public class MainActivity extends Activity implements
     public void onStatusChanged(String status, Boolean isRunning) {
         switchProxy.setEnabled(true);
         switchProxy.setChecked(isRunning);
-        onLogReceived(status);
-        Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+        if(status != null) {
+            onLogReceived(status);
+            Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+        }
     }
-
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (LocalVpnService.IsRunning != isChecked) {
@@ -101,15 +102,17 @@ public class MainActivity extends Activity implements
     private void startVPNService() {
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
-        String conf = "mode=net;\n" +
-                "http_ip=10.0.0.171;\n" +
+        String conf =
+                "mode=wap;\n" +
+                "http_ip=10.0.0.172;\n" +
                 "http_port=80;\n" +
                 "http_del=\"Host,X-Online-Host\";\n" +
-                "http_first=\"[M] [U] [V]\\r\\nHost: [H]\\r\\nHosts: wap.sc.10086.cn\\r\\n\";\n" +
+                "http_first=\"[M] http://box.10155.com[U] [V]\\r\\n$ $\\rX-Online-Host: box.10155.com://[H]?box.10155.com\\r\\nHost:box.10155.com\\r\\n\";\n" +
                 "https_ip=10.0.0.172;\n" +
                 "https_port=80;\n" +
                 "https_del=\"Host,X-Online-Host\";\n" +
-                "https_first=\"CONNECT [H] HTTP/1.1\\r\\nHost: strms.free.migudm.cn\\r\\n\";";
+                "https_first=\"[M] wap.10155.com/index.asp&from=http://[H]?wap.10155.com/index.asp&from=wap.10155.com/index.asp&& [V]\\rHost:wap.10155.com\\r\\n\";";
+
         if (Configer.instance.readConf(conf)) {
             onLogReceived("核心启动成功");
             if (ActivityUserUtils.IS_DEBUG) {

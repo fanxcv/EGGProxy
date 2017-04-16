@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 
 import cn.EGGMaster.core.Configer;
+import cn.EGGMaster.tcpip.CommonMethods;
 import cn.EGGMaster.util.ActivityUserUtils;
 
 public class HttpConnectTunnel extends Tunnel {
@@ -46,7 +47,10 @@ public class HttpConnectTunnel extends Tunnel {
                 .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[V\\]", "HTTP/1.1")
                 //.replaceAll("\\[H\\]", this.m_DestAddress.getHostName())
-                .replaceAll("\\[H\\]", this.m_DestAddress.toString().replace("/",""))
+                .replaceAll("\\[H\\]",
+                        CommonMethods.ipBytesToString(this.m_DestAddress.getAddress().getAddress())
+                        + ":" + this.m_DestAddress.getPort()
+                )
                 .replaceAll("\\[U\\]", "/")
                 + "Proxy-Connection: keep-alive\r\n"
                 + "\r\n";

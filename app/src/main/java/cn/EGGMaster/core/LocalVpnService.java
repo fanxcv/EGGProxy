@@ -146,13 +146,14 @@ public class LocalVpnService extends VpnService implements Runnable {
                 if (IsRunning) {
                     runVPN();
                 } else {
-                    Thread.sleep(1000);
+                    //Thread.sleep(1000);
+                    break;
                 }
             }
         } catch (Exception e) {
-        } finally {
-            dispose();
-        }
+            disconnectVPN();
+        }/* finally {
+        }*/
     }
 
     private void runVPN() throws Exception {
@@ -290,12 +291,17 @@ public class LocalVpnService extends VpnService implements Runnable {
             }
         } catch (Exception e) {
         }
-        onStatusChanged("VPN" + getString(R.string.vpn_disconnected_status), false);
+        onStatusChanged(null, false);
+        stopSelf();
     }
 
-    private synchronized void dispose() {
-        disconnectVPN();
-
+    @Override
+    public void onDestroy() {
+        IsRunning = false;
+        if (m_VPNThread != null) {
+            m_VPNThread.interrupt();
+        }
+        onStatusChanged("VPN" + getString(R.string.vpn_disconnected_status), false);
         // 停止TcpServer
         if (m_TcpProxyServer != null) {
             m_TcpProxyServer.stop();
@@ -308,17 +314,6 @@ public class LocalVpnService extends VpnService implements Runnable {
             m_DnsProxy.stop();
             m_DnsProxy = null;
             writeLog("DNS服务已停止");
-        }
-
-        stopSelf();
-        IsRunning = false;
-        System.exit(0);
-    }
-
-    @Override
-    public void onDestroy() {
-        if (m_VPNThread != null) {
-            m_VPNThread.interrupt();
         }
     }
 

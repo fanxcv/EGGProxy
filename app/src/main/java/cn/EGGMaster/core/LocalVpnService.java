@@ -140,7 +140,7 @@ public class LocalVpnService extends VpnService implements Runnable {
             m_DnsProxy.start();
             writeLog("DNS服务已开启");
 
-            ProxyConfig.Instance.loadFromUrl();
+            //ProxyConfig.Instance.loadFromUrl();
 
             while (true) {
                 if (IsRunning) {

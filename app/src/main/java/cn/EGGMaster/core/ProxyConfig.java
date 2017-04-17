@@ -9,7 +9,7 @@ public class ProxyConfig {
     public static final ProxyConfig Instance = new ProxyConfig();
     public static String AppInstallID;
     public static String AppVersion;
-    public final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
+    private final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
     public final static int FAKE_NETWORK_IP = CommonMethods.ipStringToInt("10.231.0.0");
 
     //ArrayList<Config> m_ProxyList;
@@ -126,7 +126,7 @@ public class ProxyConfig {
         return isFakeIP(ip);
     }
 
-    public void loadFromUrl() throws Exception {
+    //public void loadFromUrl() throws Exception {
         /*String[] lines = new String[]{};
 
         //m_ProxyList.clear();
@@ -151,7 +151,7 @@ public class ProxyConfig {
         /*if (m_ProxyList.size() == 0) {
             tryAddProxy(lines);
         }*/
-    }
+    //}
 
     /*private void tryAddProxy(String[] lines) {
         for (String line : lines) {

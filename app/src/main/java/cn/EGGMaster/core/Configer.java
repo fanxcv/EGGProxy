@@ -6,11 +6,8 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -74,7 +71,6 @@ public class Configer {
 
             if (val.length()>0 && key.length()>0){
                 switch (key.toLowerCase()){
-
                     case "mode":
                         mode = formatString(val);
                         break;
@@ -139,7 +135,7 @@ public class Configer {
             str = str.substring(1,str.length());
         if (str.endsWith("\""))
             str = str.substring(0,str.length()-1);
-        return str == null ? "" : str;
+        return isEmpty(str) ? "" : str;
     }
 
     private String genericFirstLine(String str)
@@ -147,10 +143,11 @@ public class Configer {
         return str.replaceAll("\\[version\\]", "\\[V\\]")
             .replaceAll("\\[method\\]", "\\[M\\]")
             .replaceAll("\\[host\\]", "\\[H\\]")
-            .replaceAll("\\[uri\\]", "\\[U\\]")
-            .replaceAll("\\\\r", "\r")
-            .replaceAll("\\\\n", "\n")
-            .replaceAll("\\\\t", "\t");
+            .replaceAll("\\[uri\\]", "\\[U\\]");
+//        Properties方式读取配置时不需要处理\r\n；它们在读取时不会被转义
+//            .replaceAll("\\\\r", "\r")
+//            .replaceAll("\\\\n", "\n")
+//            .replaceAll("\\\\t", "\t");
     }
 
     @Override

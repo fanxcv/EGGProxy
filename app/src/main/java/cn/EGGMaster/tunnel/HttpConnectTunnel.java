@@ -7,7 +7,7 @@ import java.nio.channels.Selector;
 
 import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
-import cn.EGGMaster.util.ActivityUserUtils;
+import cn.EGGMaster.util.StaticVal;
 
 public class HttpConnectTunnel extends Tunnel {
 
@@ -26,7 +26,7 @@ public class HttpConnectTunnel extends Tunnel {
                 super.onTunnelEstablished();
                 return;
             } else {
-                if (ActivityUserUtils.IS_DEBUG)
+                if (StaticVal.IS_DEBUG)
                     throw new Exception(String.format("Proxy server responsed an error: %s", new Object[]{new String(byteBuffer.array(), byteBuffer.position(), 12)}));
             }
         }

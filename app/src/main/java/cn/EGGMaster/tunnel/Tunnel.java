@@ -235,16 +235,16 @@ public abstract class Tunnel {
             }
             s = new String(bc.array(), 0, bc.limit());
             if (s.equals("\r")) {
-                if (ActivityUserUtils.IS_DEBUG)
+                if (Utils.IS_DEBUG)
                     System.out.printf("到http请求末尾了，再见了，buffer一共长：%d;我读到了：%d\r\n", buffer.limit(), buffer.position());
                 break;
             }
             if (isEmpty(s)) {
-                if (ActivityUserUtils.IS_DEBUG)
+                if (Utils.IS_DEBUG)
                     System.out.println("字段为空，我要跳过了");
                 continue;
             }
-            if (ActivityUserUtils.IS_DEBUG)
+            if (Utils.IS_DEBUG)
                 System.out.printf("原请求字段：Id:%d;内容：%s\r\n", i, s);
             if (i == 1 && (s.startsWith(METHOD_GET) || s.startsWith(METHOD_POST))) {
                 header = new StringBuffer();
@@ -258,21 +258,21 @@ public abstract class Tunnel {
             }
         }
         buildHeader();
-        if (ActivityUserUtils.IS_DEBUG)
+        if (Utils.IS_DEBUG)
             System.out.println("新的请求： " + header.toString());
         newByteBuffer.clear();
         newByteBuffer.put(ByteBuffer.wrap(header.toString().getBytes()));
-        if (ActivityUserUtils.IS_DEBUG)
+        if (Utils.IS_DEBUG)
             System.out.printf("newByteBuffer的第一次位置： %d\r\n", newByteBuffer.position());
         if (buffer.position() < buffer.limit()) {
             newByteBuffer.put(buffer.array(), buffer.position(), buffer.limit() - buffer.position());
         }
-        if (ActivityUserUtils.IS_DEBUG) {
+        if (Utils.IS_DEBUG) {
             System.out.printf("newByteBuffer的第二次位置： %d\r\n", newByteBuffer.position());
             System.out.printf("buffer的长度： %d\r\n", buffer.position());
         }
         newByteBuffer.flip();
-        if (ActivityUserUtils.IS_DEBUG) {
+        if (Utils.IS_DEBUG) {
             System.out.printf("newByteBuffer的长度： %d\r\n", newByteBuffer.limit());
         }
         return newByteBuffer;*/

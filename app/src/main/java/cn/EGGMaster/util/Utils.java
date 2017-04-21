@@ -1,21 +1,19 @@
 package cn.EGGMaster.util;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 
-import java.util.UUID;
+import static cn.EGGMaster.util.StaticVal.INDEX;
 
 /**
  * Created by Fan on 2017/4/4.
  */
 
-public class ActivityUserUtils extends Activity {
-    public static final boolean IS_DEBUG = true;
-    private static String appInstallID = null;
-    private static String versionName = null;
+public class Utils {
 
     /**
      * toast提醒
@@ -33,39 +31,54 @@ public class ActivityUserUtils extends Activity {
     }*/
 
     /**
-     * 获取软件版本号
+     * POST请求数据
      */
-    public static String getVersionName(Context context) {
-        if (versionName == null || versionName.isEmpty()) {
-            PackageManager packageManager = context.getPackageManager();
-            if (packageManager == null) {
-                return null;
+    public static String sendPost(String url, String... param) {
+        String result = "";
+        PrintWriter out = null;
+        BufferedReader in = null;
+        StringBuffer strs = new StringBuffer();
+        try {
+            URL realUrl = new URL(INDEX + url);
+            // 打开和URL之间的连接
+            URLConnection conn = realUrl.openConnection();
+            // 设置通用的请求属性
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            // 发送POST请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            //处理参数
+            for (String s : param) {
+                String[] vals = s.split("=", 2);
+                strs.append(vals[0]).append("=").append(StringCode.getInstance().encrypt(vals[1])).append("&");
             }
+            // 获取URLConnection对象对应的输出流
+            out = new PrintWriter(conn.getOutputStream());
+            // 发送请求参数
+            out.print(strs.toString());
+            out.flush();
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result += line;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             try {
-                versionName = packageManager.getPackageInfo(context.getPackageName(), 0).versionName;
-            } catch (PackageManager.NameNotFoundException e) {
-                return null;
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
-        return versionName;
-    }
-
-
-    /**
-     * 获取安装ID
-     */
-    public static String getAppInstallID(Context context) {
-        if (appInstallID == null || appInstallID.isEmpty()) {
-            SharedPreferences preferences = context.getSharedPreferences("EggInfo", MODE_PRIVATE);
-            appInstallID = preferences.getString("AppInstallID", null);
-            if (appInstallID == null || appInstallID.isEmpty()) {
-                appInstallID = UUID.randomUUID().toString();
-                Editor editor = preferences.edit();
-                editor.putString("AppInstallID", appInstallID);
-                editor.commit();
-            }
-        }
-        return appInstallID;
+        return result;
     }
 
     /**

@@ -1,12 +1,8 @@
 package cn.EGGMaster.core;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import static android.text.TextUtils.isEmpty;
@@ -50,50 +46,34 @@ public class Configer {
             return false;
         }
 
-        Properties prof = new Properties();
-        try {
-            prof.load(new StringReader(conf));
-        } catch (IOException e) {
-            return false;
-        }
-
-        Enumeration<?> enumeration = prof.propertyNames();
-        while (enumeration.hasMoreElements()){
-            String key = ((String) enumeration.nextElement()).trim();
-            String val = prof.getProperty(key,"").trim();
-/*
-            if (val.endsWith(";"))
-                val = val.substring(0,val.length()-1);
-            if (val.startsWith("\""))
-                val = val.substring(1,val.length()-2);*/
-           /* if (val.endsWith("\""))
-                val = val.substring(0,val.length()-1);*/
-
-            if (val.length()>0 && key.length()>0){
-                switch (key.toLowerCase()){
+        String[] lines = conf.split(";");
+        for (String line : lines) {
+            if (!line.startsWith("#")) {
+                String[] params = line.split("=", 2);
+                switch (params[0].toLowerCase().trim()) {
                     case "mode":
-                        mode = formatString(val);
+                        mode = formatString(params[1]);
                         break;
                     case "http_ip":
-                        http_ip = formatString(val);
+                        http_ip = formatString(params[1]);
                         break;
                     case "http_port":
-                        http_port = formatString(val);
+                        http_port = formatString(params[1]);
                         break;
                     case "http_del":
-                        http_del = formatString(val).split(",");
+                        http_del = formatString(params[1]).split(",");
                         break;
                     case "http_first":
-                        http_first = genericFirstLine(formatString(val));
+                        http_first = genericFirstLine(formatString(params[1]));
                         break;
                     case "https_ip":
-                        https_ip = formatString(val);
+                        https_ip = formatString(params[1]);
                         break;
                     case "https_port":
-                        https_port = formatString(val);
+                        https_port = formatString(params[1]);
                         break;
                     case "https_first":
-                        https_first = genericFirstLine(formatString(val));
+                        https_first = genericFirstLine(formatString(params[1]));
                         break;
                 }
             }
@@ -128,26 +108,23 @@ public class Configer {
                 str = matcher.group(1);
             }
         }*/
-
         if (str.endsWith(";"))
-            str = str.substring(0,str.length()-1);
+            str = str.substring(0, str.length() - 1);
         if (str.startsWith("\""))
-            str = str.substring(1,str.length());
+            str = str.substring(1, str.length());
         if (str.endsWith("\""))
-            str = str.substring(0,str.length()-1);
+            str = str.substring(0, str.length() - 1);
         return isEmpty(str) ? "" : str;
     }
 
-    private String genericFirstLine(String str)
-    {
+    private String genericFirstLine(String str) {
         return str.replaceAll("\\[version\\]", "\\[V\\]")
-            .replaceAll("\\[method\\]", "\\[M\\]")
-            .replaceAll("\\[host\\]", "\\[H\\]")
-            .replaceAll("\\[uri\\]", "\\[U\\]");
-//        Properties方式读取配置时不需要处理\r\n；它们在读取时不会被转义
-//            .replaceAll("\\\\r", "\r")
-//            .replaceAll("\\\\n", "\n")
-//            .replaceAll("\\\\t", "\t");
+                .replaceAll("\\[method\\]", "\\[M\\]")
+                .replaceAll("\\[host\\]", "\\[H\\]")
+                .replaceAll("\\[uri\\]", "\\[U\\]")
+                .replaceAll("\\\\r", "\r")
+                .replaceAll("\\\\n", "\n")
+                .replaceAll("\\\\t", "\t");
     }
 
     @Override

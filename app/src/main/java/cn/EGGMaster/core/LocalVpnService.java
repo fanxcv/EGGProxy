@@ -23,7 +23,7 @@ import cn.EGGMaster.tcpip.IPHeader;
 import cn.EGGMaster.tcpip.TCPHeader;
 import cn.EGGMaster.tcpip.UDPHeader;
 import cn.EGGMaster.ui.MainActivity;
-import cn.EGGMaster.util.ActivityUserUtils;
+import cn.EGGMaster.util.DataUtils;
 
 
 public class LocalVpnService extends VpnService implements Runnable {
@@ -127,8 +127,8 @@ public class LocalVpnService extends VpnService implements Runnable {
     @Override
     public synchronized void run() {
         try {
-            ProxyConfig.AppInstallID = ActivityUserUtils.getAppInstallID(this);//获取安装ID
-            ProxyConfig.AppVersion = ActivityUserUtils.getVersionName(this);//获取版本号
+            ProxyConfig.AppInstallID = DataUtils.appInstallID;//获取安装ID
+            ProxyConfig.AppVersion = DataUtils.versionName;//获取版本号
             writeLog("安卓版本: %s", Build.VERSION.RELEASE);
             writeLog("App版本: %s", ProxyConfig.AppVersion);
 

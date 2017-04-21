@@ -60,23 +60,6 @@ public class StringCode {
 	}
 
 	/**
-	 * 获取自定义密匙的StringCode对象
-	 * 
-	 * @return
-	 */
-	public static synchronized StringCode getInstance(String init) {
-		try {
-			if (code == null) {
-				code = new StringCode(init);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		return code;
-	}
-
-	/**
 	 * 从指定字符串生成密钥，密钥所需的字节数组长度为8位 不足8位时后面补0，超出8位只取前8位
 	 * 
 	 * @param arrBTmp

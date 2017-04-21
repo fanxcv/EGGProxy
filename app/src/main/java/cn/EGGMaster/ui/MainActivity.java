@@ -102,7 +102,7 @@ public class MainActivity extends Activity implements
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
         String conf = "mode=net;\n" +
-                "http_ip=10.0.0.171;\n" +
+                "http_ip=10.0.0.172;\n" +
                 "http_port=80;\n" +
                 "http_del=\"Host,X-Online-Host\";\n" +
                 "http_first=\"[M] [U] [V]\\r\\nHost: [H]\\r\\nHosts: wap.sc.10086.cn\\r\\n\";\n" +

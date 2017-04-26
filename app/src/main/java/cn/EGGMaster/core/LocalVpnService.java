@@ -146,14 +146,14 @@ public class LocalVpnService extends VpnService implements Runnable {
                 if (IsRunning) {
                     runVPN();
                 } else {
-                    //Thread.sleep(1000);
-                    break;
+                    Thread.sleep(1000);
                 }
             }
         } catch (Exception e) {
             disconnectVPN();
-        }/* finally {
-        }*/
+        } finally {
+            dispose();
+        }
     }
 
     private void runVPN() throws Exception {
@@ -170,8 +170,8 @@ public class LocalVpnService extends VpnService implements Runnable {
                 }
                 onIPPacketReceived(m_IPHeader, size);
             }
-            if (true) ;
-            //Thread.sleep(5);
+            //if (true) ;
+            Thread.sleep(5);
         }
         in.close();
         disconnectVPN();
@@ -291,8 +291,30 @@ public class LocalVpnService extends VpnService implements Runnable {
             }
         } catch (Exception e) {
         }
-        onStatusChanged(null, false);
+        onStatusChanged("VPN" + getString(R.string.vpn_disconnected_status), false);
+        //stopSelf();
+    }
+
+    private synchronized void dispose() {
+        disconnectVPN();
+
+        // 停止TcpServer
+        if (m_TcpProxyServer != null) {
+            m_TcpProxyServer.stop();
+            m_TcpProxyServer = null;
+            writeLog("LocalTcpServer stopped.");
+        }
+
+        // 停止DNS解析器
+        if (m_DnsProxy != null) {
+            m_DnsProxy.stop();
+            m_DnsProxy = null;
+            writeLog("LocalDnsProxy stopped.");
+        }
+
         stopSelf();
+        IsRunning = false;
+        System.exit(0);
     }
 
     @Override
@@ -300,20 +322,6 @@ public class LocalVpnService extends VpnService implements Runnable {
         IsRunning = false;
         if (m_VPNThread != null) {
             m_VPNThread.interrupt();
-        }
-        onStatusChanged("VPN" + getString(R.string.vpn_disconnected_status), false);
-        // 停止TcpServer
-        if (m_TcpProxyServer != null) {
-            m_TcpProxyServer.stop();
-            m_TcpProxyServer = null;
-            writeLog("TCP服务已停止");
-        }
-
-        // 停止DNS解析器
-        if (m_DnsProxy != null) {
-            m_DnsProxy.stop();
-            m_DnsProxy = null;
-            writeLog("DNS服务已停止");
         }
     }
 

@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import static cn.EGGMaster.util.StaticVal.INDEX;
 
@@ -14,21 +14,6 @@ import static cn.EGGMaster.util.StaticVal.INDEX;
  */
 
 public class Utils {
-
-    /**
-     * toast提醒
-     */
-    /*public static void ToastNotice(Context context, Object msg) {
-        if (msg instanceof String) {
-            Toast.makeText(context, (String) msg, Toast.LENGTH_SHORT).show();
-        } else if (msg instanceof Integer) {
-            Toast.makeText(context, (int) msg, Toast.LENGTH_SHORT).show();
-        } else {
-            if (IS_DEBUG) {
-                Toast.makeText(context, "未知的提示错误： " + msg.toString(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }*/
 
     /**
      * POST请求数据
@@ -41,11 +26,10 @@ public class Utils {
         try {
             URL realUrl = new URL(INDEX + url);
             // 打开和URL之间的连接
-            URLConnection conn = realUrl.openConnection();
-            // 设置通用的请求属性
-            conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
+            conn.setRequestMethod("POST");// 提交模式
+            conn.setConnectTimeout(5000);//连接超时 单位毫秒
+            conn.setReadTimeout(10000);//读取超时 单位毫秒
             // 发送POST请求必须设置如下两行
             conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -80,6 +64,21 @@ public class Utils {
         }
         return result;
     }
+
+    /**
+     * toast提醒
+     */
+    /*public static void ToastNotice(Context context, Object msg) {
+        if (msg instanceof String) {
+            Toast.makeText(context, (String) msg, Toast.LENGTH_SHORT).show();
+        } else if (msg instanceof Integer) {
+            Toast.makeText(context, (int) msg, Toast.LENGTH_SHORT).show();
+        } else {
+            if (IS_DEBUG) {
+                Toast.makeText(context, "未知的提示错误： " + msg.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }*/
 
     /**
      * 字符串判空

@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_item_switch" android:showAsAction="always" android:title="@string/menu_item_switch" android:actionViewClass="android.widget.Switch"></item>
-    <!--<item android:id="@+id/menu_item_setting" android:title="@string/menu_item_setting"></item>-->
-    <!--<item android:id="@+id/menu_item_about" android:title="@string/menu_item_about"></item>-->
+    <item android:id="@+id/menu_item_list" android:title="@string/menu_item_list"></item>
+    <item android:id="@+id/menu_item_buy" android:title="@string/menu_item_buy"></item>
+    <item android:id="@+id/menu_item_use" android:title="@string/menu_item_use"></item>
     <item android:id="@+id/menu_item_exit" android:title="@string/menu_item_exit"></item>
 </menu>

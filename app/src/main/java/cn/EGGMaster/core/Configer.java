@@ -41,42 +41,49 @@ public class Configer {
     /**
      * 读取配置文件生成对象
      */
-    public boolean readConf(String conf) {
+    public boolean readConf(String conf, String type) {
         if (isEmpty(conf)) {
             return false;
         }
-
-        String[] lines = conf.split(";");
-        for (String line : lines) {
-            if (!line.startsWith("#")) {
-                String[] params = line.split("=", 2);
-                switch (params[0].toLowerCase().trim()) {
-                    case "mode":
-                        mode = formatString(params[1]);
-                        break;
-                    case "http_ip":
-                        http_ip = formatString(params[1]);
-                        break;
-                    case "http_port":
-                        http_port = formatString(params[1]);
-                        break;
-                    case "http_del":
-                        http_del = formatString(params[1]).split(",");
-                        break;
-                    case "http_first":
-                        http_first = genericFirstLine(formatString(params[1]));
-                        break;
-                    case "https_ip":
-                        https_ip = formatString(params[1]);
-                        break;
-                    case "https_port":
-                        https_port = formatString(params[1]);
-                        break;
-                    case "https_first":
-                        https_first = genericFirstLine(formatString(params[1]));
-                        break;
+        switch (type) {
+            case "0":
+                String[] lines = conf.split(";");
+                for (String line : lines) {
+                    if (!line.startsWith("#")) {
+                        String[] params = line.split("=", 2);
+                        switch (params[0].toLowerCase().trim()) {
+                            case "mode":
+                                mode = formatString(params[1]);
+                                break;
+                            case "http_ip":
+                                http_ip = formatString(params[1]);
+                                break;
+                            case "http_port":
+                                http_port = formatString(params[1]);
+                                break;
+                            case "http_del":
+                                http_del = formatString(params[1]).split(",");
+                                break;
+                            case "http_first":
+                                http_first = genericFirstLine(formatString(params[1]));
+                                break;
+                            case "https_ip":
+                                https_ip = formatString(params[1]);
+                                break;
+                            case "https_port":
+                                https_port = formatString(params[1]);
+                                break;
+                            case "https_first":
+                                https_first = genericFirstLine(formatString(params[1]));
+                                break;
+                        }
+                    }
                 }
-            }
+                break;
+            case "1":
+                break;
+            default:
+                return false;
         }
         if ("net".equals(mode))
             isNet = true;

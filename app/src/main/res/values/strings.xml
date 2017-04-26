@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="key">FanDeTestVpnKey</string>
-    <string name="app_name">EGGProxy</string>
-    <string name="menu_item_switch">代理</string>
+    <string name="key">f7XPZto7MbFaLXV397rtf</string>
+    <string name="app_name">Proxy</string>
+    <string name="menu_item_switch">菜单</string>
     <string name="menu_item_exit">退出</string>
     <string name="vpn_connected_status">已连接</string>
     <string name="vpn_disconnected_status">已断开</string>
     <string name="exit_confirm_info">这将会断开VPN连接，确定要退出吗？</string>
+    <string name="use_code_info">由于账号归属问题，充值将会清空你的现有可用时间并改变账号归属，确定要继续吗？</string>
     <string name="btn_cancel">取消</string>
     <string name="btn_ok">确定</string>
-    <string name="title_activity_menu">EGGProxy</string>
-
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="action_example">Example action</string>
-
-    <string name="action_settings">Settings</string>
+    <string name="explain">公告：</string>
+    <string name="code_use">请输入充值码</string>
+    <string name="info_title">温馨提示：</string>
+    <string name="line_explain">亲，你可以通过点击名称选择需要的线路哟</string>
+    <string name="menu_item_use">充值</string>
+    <string name="menu_item_buy">购买</string>
+    <string name="menu_item_list">线路选择</string>
 </resources>

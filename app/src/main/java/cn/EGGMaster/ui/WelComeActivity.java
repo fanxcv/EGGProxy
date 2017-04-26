@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import cn.EGGMaster.R;
@@ -31,18 +32,22 @@ public class WelComeActivity extends Activity {
 
         if (DataUtils.APP_KEY == null)
             DataUtils.APP_KEY = getString(R.string.key);
-        DataUtils.intLocalData(this);
+        if (!DataUtils.initLocalData(this)) {
+            Toast.makeText(this, "本地数据加载错误！请检查软件权限是否打开", Toast.LENGTH_LONG).show();
+            return;
+        }
         if (LocalVpnService.IsRunning)
-            Start();
+            start();
 
-        String versionBack = sendPost("getVersion", "version=" + DataUtils.versionName);
-        if ("0".equals(versionBack)) {
+        if (TextUtils.isEmpty(DataUtils.webVersion))
+            DataUtils.webVersion = sendPost("getVersion", "version=" + DataUtils.versionName);
+        if ("0".equals(DataUtils.webVersion)) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")
                     .setMessage("当前版本需要更新，请联系应用提供商更新！")
                     .setPositiveButton(R.string.btn_ok, null)
                     .show();
-        } else if ("1".equals(versionBack)) {
+        } else if ("1".equals(DataUtils.webVersion)) {
             getInfo();
         } else {
             Toast.makeText(this, "网络错误！", Toast.LENGTH_SHORT).show();
@@ -51,9 +56,10 @@ public class WelComeActivity extends Activity {
 
     private void getInfo() {
         DataUtils.initWebData();
+        start();
     }
 
-    private void Start() {
+    private void start() {
         Intent intent = new Intent();
         intent.setClass(WelComeActivity.this, MainActivity.class);
         startActivity(intent);

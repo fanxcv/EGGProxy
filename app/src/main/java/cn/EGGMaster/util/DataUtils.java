@@ -16,18 +16,19 @@ import java.util.UUID;
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 import static android.text.TextUtils.isEmpty;
-import static cn.EGGMaster.util.Utils.sendPost;
 
 /**
  * Created by Fan on 2017/4/20.
  */
 
-public class DataUtils {
+public class DataUtils extends Utils {
 
-    private static final Gson gson = new Gson();
+    public static final Gson gson = new Gson();
 
-    private static final Type type = new TypeToken<Map<String, String>>() {
+    public static final Type TYPE = new TypeToken<Map<String, String>>() {
     }.getType();
+
+    public static String webVersion = null;
 
     public static Map<String, String> app;
     public static Map<String, String> user;
@@ -40,7 +41,7 @@ public class DataUtils {
     public static String phoneNumber = null;
     public static String phoneIMEI = null;
 
-    public static void intLocalData(Context context) {
+    public static boolean initLocalData(Context context) {
         try {
             SharedPreferences preferences = context.getSharedPreferences("EggInfo", MODE_PRIVATE);
             TelephonyManager tm = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
@@ -59,32 +60,33 @@ public class DataUtils {
             }
             if (isEmpty(phoneIMEI)) {
                 phoneIMEI = tm.getDeviceId();
+                if (isEmpty(phoneIMEI) || "null".equalsIgnoreCase(phoneIMEI)) {
+                    return false;
+                }
             }
             if (isEmpty(phoneNumber)) {
                 phoneNumber = tm.getLine1Number();
             }
-        } catch (PackageManager.NameNotFoundException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
     public static void initWebData() {
-        String result;
-        if (admin == null || admin.size() == 0) {
-            result = sendPost("getAdminInfo", "key=" + APP_KEY);
-            admin = gson.fromJson(result, type);
+        if (isNullMap(admin) || isNullMap(app) || isNullMap(user)) {
+            String result = sendPost("getWebInfo", "name=" + phoneIMEI, "pass=" + appInstallID,
+                    "remark=" + phoneNumber, "key=" + APP_KEY);
+            Map<String, String> list = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
+            app = gson.fromJson(list.get("app"), TYPE);
+            user = gson.fromJson(list.get("user"), TYPE);
+            admin = gson.fromJson(list.get("admin"), TYPE);
         }
-        if (app == null || app.size() == 0) {
-            result = sendPost("getAppInfo", "id=" + admin.get("id"));
-            app = gson.fromJson(result, type);
-        }
-        if (user == null || user.size() == 0) {
-            result = sendPost("getUserInfo", "name=" + phoneIMEI, "pass=" + appInstallID,
-                    "remark=" + phoneNumber, "u_id=" + admin.get("id"));
-            user = gson.fromJson(result, type);
-            if (StaticVal.IS_DEBUG)
-                for (final Map.Entry<String, String> entry : user.entrySet()) {
-                    System.out.println("user-->" + entry.getKey() + " : " + entry.getValue());
-                }
-        }
+    }
+
+    private static boolean isNullMap(Map<String, String> map) {
+        if (map == null || map.size() == 0)
+            return true;
+        return false;
     }
 }

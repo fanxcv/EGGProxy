@@ -136,15 +136,6 @@ public class MainActivity extends Activity implements
     private void startVPNService() {
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
-//        String conf = "mode=net;\n" +
-//                "http_ip=10.0.0.171;\n" +
-//                "http_port=80;\n" +
-//                "http_del=\"Host,X-Online-Host\";\n" +
-//                "http_first=\"[M] [U] [V]\\r\\nHost: [H]\\r\\nHosts: wap.sc.10086.cn\\r\\n\";\n" +
-//                "https_ip=10.0.0.172;\n" +
-//                "https_port=80;\n" +
-//                "https_del=\"Host,X-Online-Host\";\n" +
-//                "https_first=\"CONNECT [H] HTTP/1.1\\r\\nHost: strms.free.migudm.cn\\r\\n\";";
         SharedPreferences preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
         String id = preferences.getString("lineId", null);
         if (isEmpty(id)) {
@@ -153,12 +144,8 @@ public class MainActivity extends Activity implements
         }
         String result = Utils.sendPost("getLine", "id=" + id);
         Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
-        if (Configer.instance.readConf(line.get("value"), line.get("type") + "")) {
+        if (line != null && Configer.instance.readConf(line.get("value"), line.get("type") + "")) {
             onLogReceived("核心启动成功");
-//            if (StaticVal.IS_DEBUG) {
-//                onLogReceived("加载模式为：");
-//                onLogReceived(Configer.instance.toString());
-//            }
         } else {
             onLogReceived("核心加载配置文件失败，请稍后重试");
             switchProxy.post(new Runnable() {

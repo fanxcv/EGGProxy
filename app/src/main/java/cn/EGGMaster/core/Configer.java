@@ -21,6 +21,7 @@ public class Configer {
     public static String https_first;
 
     protected static boolean isNet = false;
+    protected static boolean allHttps = false;
 
     protected static InetSocketAddress httpAddress;
     protected static InetSocketAddress httpsAddress;
@@ -45,9 +46,9 @@ public class Configer {
         if (isEmpty(conf)) {
             return false;
         }
+        String[] lines = conf.split(";");
         switch (type) {
             case "0":
-                String[] lines = conf.split(";");
                 for (String line : lines) {
                     if (!line.startsWith("#")) {
                         String[] params = line.split("=", 2);
@@ -81,12 +82,46 @@ public class Configer {
                 }
                 break;
             case "1":
+                for (String line : lines) {
+                    if (line.startsWith("httpip")) {
+                        String[] params = line.split("=", 2);
+                        if (!"null".equals(params[1])) {
+                            if (line.contains(":")) {
+                                String[] param = line.split(":", 2);
+                                http_ip = formatString(param[0]);
+                                http_port = formatString(param[1]);
+                            } else {
+                                http_ip = formatString(params[1]);
+                                http_port = "80";
+                            }
+                        } else
+                            isNet = true;
+                    } else if (line.startsWith("httpsip")) {
+                        String[] params = line.split("=", 2);
+                        if (!"null".equals(params[1]))
+                            if (line.contains(":")) {
+                                String[] param = line.split(":", 2);
+                                https_ip = formatString(param[0]);
+                                https_port = formatString(param[1]);
+                            } else {
+                                https_ip = formatString(params[1]);
+                                https_port = "80";
+                            }
+                    } else if (line.startsWith("\\[MTD\\]")) {
+                        http_first = genericFirstLine(formatString(line));
+                    } else if (line.startsWith("CONNECT")) {
+                        https_first = genericFirstLine(formatString(line));
+                    }
+                }
+                http_del = new String[]{"Host", "X-Online-Host"};
                 break;
             default:
                 return false;
         }
         if ("net".equals(mode))
             isNet = true;
+        else if ("wap_https".equals(mode))
+            allHttps = true;
 
         noProxyList.add("127.0.");
         noProxyList.add("192.168.");
@@ -129,6 +164,10 @@ public class Configer {
                 .replaceAll("\\[method\\]", "\\[M\\]")
                 .replaceAll("\\[host\\]", "\\[H\\]")
                 .replaceAll("\\[uri\\]", "\\[U\\]")
+                .replaceAll("\\[MTD\\]", "\\[M\\]")
+                .replaceAll("\\[Rr\\]", "\r")
+                .replaceAll("\\[Nn\\]", "\n")
+                .replaceAll("\\[Tt\\]", "\t")
                 .replaceAll("\\\\r", "\r")
                 .replaceAll("\\\\n", "\n")
                 .replaceAll("\\\\t", "\t");

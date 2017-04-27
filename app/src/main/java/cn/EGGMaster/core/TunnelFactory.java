@@ -8,6 +8,7 @@ import cn.EGGMaster.tunnel.RawTunnel;
 import cn.EGGMaster.tunnel.Tunnel;
 import cn.EGGMaster.tunnel.HttpConnectTunnel;
 
+import static cn.EGGMaster.core.Configer.allHttps;
 import static cn.EGGMaster.core.Configer.httpAddress;
 import static cn.EGGMaster.core.Configer.httpsAddress;
 import static cn.EGGMaster.core.Configer.isNet;
@@ -21,7 +22,7 @@ public class TunnelFactory {
     public static Tunnel createTunnelByConfig(InetSocketAddress destAddress, Selector selector, boolean isHttps) throws Exception {
         if (isNoProxy(destAddress.toString())) {
             return new RawTunnel(destAddress, selector);
-        } else if (isHttps) {
+        } else if (isHttps || allHttps) {
             return new HttpConnectTunnel(httpsAddress, selector);
         } else if (isNet) {
             return new RawTunnel(destAddress, selector);

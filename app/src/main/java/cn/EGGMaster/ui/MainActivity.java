@@ -6,38 +6,22 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
-import java.util.Map;
 
 import cn.EGGMaster.R;
 import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.core.LocalVpnService;
 import cn.EGGMaster.util.StaticVal;
-import cn.EGGMaster.util.StringCode;
-import cn.EGGMaster.util.Utils;
-
-import static android.text.TextUtils.isEmpty;
-import static cn.EGGMaster.util.DataUtils.TYPE;
-import static cn.EGGMaster.util.DataUtils.admin;
-import static cn.EGGMaster.util.DataUtils.app;
-import static cn.EGGMaster.util.DataUtils.gson;
-import static cn.EGGMaster.util.DataUtils.phoneIMEI;
-import static cn.EGGMaster.util.DataUtils.user;
-import static cn.EGGMaster.util.Utils.sendPost;
 
 public class MainActivity extends Activity implements
         OnCheckedChangeListener,
@@ -47,8 +31,6 @@ public class MainActivity extends Activity implements
 
     private static final int START_VPN_SERVICE_REQUEST_CODE = 1985;
 
-    private TextView info;
-    private TextView explain;
     private Switch switchProxy;
     private TextView textViewLog;
     private ScrollView scrollViewLog;
@@ -61,23 +43,16 @@ public class MainActivity extends Activity implements
 
         scrollViewLog = (ScrollView) findViewById(R.id.scrollViewLog);
         textViewLog = (TextView) findViewById(R.id.textViewLog);
-        explain = (TextView) findViewById(R.id.explain);
-        info = (TextView) findViewById(R.id.info);
 
         textViewLog.setText(GL_HISTORY_LOGS);
         scrollViewLog.fullScroll(ScrollView.FOCUS_DOWN);
-
-        explain.setText(getText(R.string.explain) + StringCode.getInstance().decrypt(app.get("AppExplain")) + "");
-
-        info.setText("到期时间：" + user.get("due_time") + "\r\n剩余时间：" +
-                ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天"));
 
         mCalendar = Calendar.getInstance();
         LocalVpnService.addOnStatusChangedListener(this);
     }
 
-    @Override
     @SuppressLint("DefaultLocale")
+    @Override
     public void onLogReceived(String logString) {
         mCalendar.setTimeInMillis(System.currentTimeMillis());
         logString = String.format("[%1$02d:%2$02d:%3$02d] %4$s\n",
@@ -108,62 +83,53 @@ public class MainActivity extends Activity implements
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (!isEmpty(user.get("time")) && !"timeError".equals(user.get("time"))) {
-            if (Double.parseDouble(user.get("time")) > 0) {
-                if (LocalVpnService.IsRunning != isChecked) {
-                    switchProxy.setEnabled(false);
-                    if (isChecked) {
-                        Intent intent = LocalVpnService.prepare(this);
-                        if (intent == null) {
-                            startVPNService();
-                        } else {
-                            startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
-                        }
-                    } else {
-                        LocalVpnService.IsRunning = false;
-                    }
+        if (LocalVpnService.IsRunning != isChecked) {
+            switchProxy.setEnabled(false);
+            if (isChecked) {
+                Intent intent = LocalVpnService.prepare(this);
+                if (intent == null) {
+                    startVPNService();
+                } else {
+                    startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
                 }
             } else {
-                switchProxy.setChecked(false);
-                Toast.makeText(this, "请先充值", Toast.LENGTH_SHORT).show();
+                LocalVpnService.IsRunning = false;
             }
-        } else {
-            switchProxy.setChecked(false);
-            Toast.makeText(this, "账号归属错误，请通过充值重置账号状态", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void startVPNService() {
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
-        SharedPreferences preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
-        String id = preferences.getString("lineId", null);
-        if (isEmpty(id)) {
-            onLogReceived("你还未选择线路，请先选择线路");
-            runFalse();
-        }
-        String result = Utils.sendPost("getLine", "id=" + id);
-        Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
-        if (line != null && Configer.instance.readConf(line.get("value"), line.get("type") + "")) {
+        String conf = "mode=net;\n" +
+                "http_ip=10.0.0.171;\n" +
+                "http_port=80;\n" +
+                "http_del=\"Host,X-Online-Host\";\n" +
+                "http_first=\"[M] [U] [V]\\r\\nHost: [H]\\r\\nHosts: wap.sc.10086.cn\\r\\n\";\n" +
+                "https_ip=10.0.0.172;\n" +
+                "https_port=80;\n" +
+                "https_del=\"Host,X-Online-Host\";\n" +
+                "https_first=\"CONNECT [H] HTTP/1.1\\r\\nHost: strms.free.migudm.cn\\r\\n\";";
+        if (Configer.instance.readConf(conf)) {
             onLogReceived("核心启动成功");
+            if (StaticVal.IS_DEBUG) {
+                onLogReceived("加载模式为：");
+                onLogReceived(Configer.instance.toString());
+            }
         } else {
             onLogReceived("核心加载配置文件失败，请稍后重试");
-            runFalse();
+            switchProxy.post(new Runnable() {
+                @Override
+                public void run() {
+                    switchProxy.setChecked(false);
+                    switchProxy.setEnabled(true);
+                }
+            });
+            return;
         }
         onLogReceived("VPN启动中...");
 
         startService(new Intent(this, LocalVpnService.class));
-    }
-
-    private void runFalse() {
-        switchProxy.post(new Runnable() {
-            @Override
-            public void run() {
-                switchProxy.setChecked(false);
-                switchProxy.setEnabled(true);
-            }
-        });
-        return;
     }
 
     @Override
@@ -177,6 +143,7 @@ public class MainActivity extends Activity implements
             }
             return;
         }
+
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
@@ -203,42 +170,26 @@ public class MainActivity extends Activity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_list:
-                Intent lineIntent = new Intent(this, ListActivity.class);
-                startActivity(lineIntent);
-                return true;
-            case R.id.menu_item_buy:
-                String buyUrl = app.get("buyUrl");
-                if (isEmpty(buyUrl)) {
-                    Toast.makeText(this, "木有购买地址呀，亲", Toast.LENGTH_LONG).show();
-                } else {
-                    if (!buyUrl.startsWith("http://") && !buyUrl.startsWith("https://"))
-                        buyUrl = "http://" + buyUrl;
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(buyUrl)));
-                }
-                return true;
-            case R.id.menu_item_use:
-                if (isEmpty(user.get("time")) || "timeError".equals(user.get("time"))) {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.info_title)
-                            .setMessage(R.string.use_code_info)
-                            .setPositiveButton(R.string.btn_ok, new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    useCode(1);
-                                }
-                            })
-                            .setNegativeButton(R.string.btn_cancel, null)
-                            .show();
-                    return true;
-                }
-                useCode(0);
-                return true;
+            /*case R.id.menu_item_about:
+                new AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.app_name) + getVersionName())
+                        .setMessage(R.string.about_info)
+                        .setPositiveButton(R.string.btn_ok, null)
+                        .setNegativeButton(R.string.btn_more, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://smartproxy.me")));
+                            }
+                        })
+                        .show();
+
+                return true;*/
             case R.id.menu_item_exit:
                 if (!LocalVpnService.IsRunning) {
                     finish();
                     return true;
                 }
+
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.menu_item_exit)
                         .setMessage(R.string.exit_confirm_info)
@@ -254,46 +205,11 @@ public class MainActivity extends Activity implements
                         })
                         .setNegativeButton(R.string.btn_cancel, null)
                         .show();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    /**
-     * @param type 是否重置账号，0否，1是
-     */
-    private void useCode(final int type) {
-        final EditText editText = new EditText(this);
-        editText.setInputType(InputType.TYPE_CLASS_TEXT);
-        editText.setHint(getString(R.string.code_use));
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.menu_item_use)
-                .setView(editText)
-                .setPositiveButton(R.string.btn_ok, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (editText.getText() == null) {
-                            return;
-                        }
-                        String code = editText.getText().toString().trim();
-                        if (!isEmpty(code) && code.length() >= 6 && code.length() <= 10) {
-                            String result = sendPost("setCodeValue", "name=" + phoneIMEI, "code=" + code,
-                                    "id=" + admin.get("id"), "type=" + type);
-                            try {
-                                Map<String, String> list = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
-                                info.setText("到期时间：" + list.get("due_time") + "\r\n剩余时间：" + list.get("time") + "天");
-                            } catch (Exception e) {
-                                onLogReceived("充值失败");
-                            }
-                        } else {
-                            Toast.makeText(MainActivity.this, "充值码错误", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.btn_cancel, null)
-                .show();
     }
 
     @Override

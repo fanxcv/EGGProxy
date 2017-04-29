@@ -44,16 +44,14 @@ public class HttpConnectTunnel extends Tunnel {
     @Override
     protected void onConnected(ByteBuffer byteBuffer) throws Exception {
         String format = Configer.instance.https_first
-                .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[V\\]", "HTTP/1.1")
-                //.replaceAll("\\[H\\]", this.m_DestAddress.getHostName())
+                .replaceAll("\\[M\\]", "CONNECT")
+                .replaceAll("\\[U\\]", "/")
                 .replaceAll("\\[H\\]",
                         CommonMethods.ipBytesToString(this.m_DestAddress.getAddress().getAddress())
-                        + ":" + this.m_DestAddress.getPort()
+                                + ":" + this.m_DestAddress.getPort()
                 )
-                .replaceAll("\\[U\\]", "/")
-                + "Proxy-Connection: keep-alive\r\n"
-                + "\r\n";
+                + "\r\n\r\n";
         byteBuffer.clear();
         byteBuffer.put(format.getBytes());
         byteBuffer.flip();

@@ -140,7 +140,7 @@ public class MainActivity extends Activity implements
         String id = preferences.getString("lineId", null);
         if (isEmpty(id)) {
             onLogReceived("你还未选择线路，请先选择线路");
-            return;
+            runFalse();
         }
         String result = Utils.sendPost("getLine", "id=" + id);
         Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
@@ -148,18 +148,22 @@ public class MainActivity extends Activity implements
             onLogReceived("核心启动成功");
         } else {
             onLogReceived("核心加载配置文件失败，请稍后重试");
-            switchProxy.post(new Runnable() {
-                @Override
-                public void run() {
-                    switchProxy.setChecked(false);
-                    switchProxy.setEnabled(true);
-                }
-            });
-            return;
+            runFalse();
         }
         onLogReceived("VPN启动中...");
 
         startService(new Intent(this, LocalVpnService.class));
+    }
+
+    private void runFalse() {
+        switchProxy.post(new Runnable() {
+            @Override
+            public void run() {
+                switchProxy.setChecked(false);
+                switchProxy.setEnabled(true);
+            }
+        });
+        return;
     }
 
     @Override
@@ -261,7 +265,7 @@ public class MainActivity extends Activity implements
      */
     private void useCode(final int type) {
         final EditText editText = new EditText(this);
-        editText.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
         editText.setHint(getString(R.string.code_use));
 
         new AlertDialog.Builder(this)

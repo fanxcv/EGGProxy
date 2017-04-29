@@ -1,7 +1,6 @@
 package cn.EGGMaster.core;
 
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,7 +8,7 @@ import static android.text.TextUtils.isEmpty;
 
 public class Configer {
 
-    private String mode = "";
+    private String mode = "wap";
 
     private String http_ip;
     private String http_port;
@@ -50,44 +49,43 @@ public class Configer {
         switch (type) {
             case "0":
                 for (String line : lines) {
-                    if (!line.startsWith("#")) {
-                        String[] params = line.split("=", 2);
-                        switch (params[0].toLowerCase().trim()) {
-                            case "mode":
-                                mode = formatString(params[1]);
-                                break;
-                            case "http_ip":
-                                http_ip = formatString(params[1]);
-                                break;
-                            case "http_port":
-                                http_port = formatString(params[1]);
-                                break;
-                            case "http_del":
-                                http_del = formatString(params[1]).split(",");
-                                break;
-                            case "http_first":
-                                http_first = genericFirstLine(formatString(params[1]));
-                                break;
-                            case "https_ip":
-                                https_ip = formatString(params[1]);
-                                break;
-                            case "https_port":
-                                https_port = formatString(params[1]);
-                                break;
-                            case "https_first":
-                                https_first = genericFirstLine(formatString(params[1]));
-                                break;
-                        }
+                    String[] params = line.split("=", 2);
+                    switch (params[0].toLowerCase().trim()) {
+                        case "mode":
+                            mode = formatString(params[1]);
+                            break;
+                        case "http_ip":
+                            http_ip = formatString(params[1]);
+                            break;
+                        case "http_port":
+                            http_port = formatString(params[1]);
+                            break;
+                        case "http_del":
+                            http_del = formatString(params[1]).split(",");
+                            break;
+                        case "http_first":
+                            http_first = genericFirstLine(formatString(params[1]));
+                            break;
+                        case "https_ip":
+                            https_ip = formatString(params[1]);
+                            break;
+                        case "https_port":
+                            https_port = formatString(params[1]);
+                            break;
+                        case "https_first":
+                            https_first = genericFirstLine(formatString(params[1]));
+                            break;
                     }
                 }
                 break;
             case "1":
                 for (String line : lines) {
-                    if (line.startsWith("httpip")) {
+                    line = line.trim();
+                    if (line.contains("httpip")) {
                         String[] params = line.split("=", 2);
                         if (!"null".equals(params[1])) {
                             if (line.contains(":")) {
-                                String[] param = line.split(":", 2);
+                                String[] param = params[1].split(":", 2);
                                 http_ip = formatString(param[0]);
                                 http_port = formatString(param[1]);
                             } else {
@@ -95,22 +93,22 @@ public class Configer {
                                 http_port = "80";
                             }
                         } else
-                            isNet = true;
-                    } else if (line.startsWith("httpsip")) {
+                            mode = "net";
+                    } else if (line.contains("httpsip")) {
                         String[] params = line.split("=", 2);
                         if (!"null".equals(params[1]))
                             if (line.contains(":")) {
-                                String[] param = line.split(":", 2);
+                                String[] param = params[1].split(":", 2);
                                 https_ip = formatString(param[0]);
                                 https_port = formatString(param[1]);
                             } else {
                                 https_ip = formatString(params[1]);
                                 https_port = "80";
                             }
-                    } else if (line.startsWith("\\[MTD\\]")) {
-                        http_first = genericFirstLine(formatString(line));
-                    } else if (line.startsWith("CONNECT")) {
-                        https_first = genericFirstLine(formatString(line));
+                    } else if (line.contains("[MTD]")) {
+                        http_first = genericFirstLine(formatString(line + "\\r\\n"));
+                    } else if (line.contains("CONNECT")) {
+                        https_first = genericFirstLine(formatString(line + "\\r\\n"));
                     }
                 }
                 http_del = new String[]{"Host", "X-Online-Host"};
@@ -139,17 +137,9 @@ public class Configer {
     }
 
     private String formatString(String str) {
+        str = str.trim();
         if (isEmpty(str))
             return "";
-        /*str = str.trim();
-        if (!isEmpty(str)) {
-            String regex = "\"?([^\"]*)\"?;?$";
-            Pattern patter = Pattern.compile(regex);
-            Matcher matcher = patter.matcher(str);
-            if (matcher.find()) {
-                str = matcher.group(1);
-            }
-        }*/
         if (str.endsWith(";"))
             str = str.substring(0, str.length() - 1);
         if (str.startsWith("\""))
@@ -173,16 +163,16 @@ public class Configer {
                 .replaceAll("\\\\t", "\t");
     }
 
-    @Override
-    public String toString() {
-        return "\r\nmode='" + mode + '\'' +
-                "\r\nhttp_ip='" + http_ip + '\'' +
-                "\r\nhttp_port='" + http_port + '\'' +
-                "\r\nhttp_del=" + Arrays.toString(http_del) +
-                "\r\nhttp_first='" + http_first + '\'' +
-                "\r\nhttps_ip='" + https_ip + '\'' +
-                "\r\nhttps_port='" + https_port + '\'' +
-                "\r\nhttps_first='" + https_first + '\'' +
-                "\r\nnoProxyList=" + Arrays.toString(getNoProxyList());
-    }
+//    @Override
+//    public String toString() {
+//        return "\r\nmode='" + mode + '\'' +
+//                "\r\nhttp_ip='" + http_ip + '\'' +
+//                "\r\nhttp_port='" + http_port + '\'' +
+//                "\r\nhttp_del=" + Arrays.toString(http_del) +
+//                "\r\nhttp_first='" + http_first + '\'' +
+//                "\r\nhttps_ip='" + https_ip + '\'' +
+//                "\r\nhttps_port='" + https_port + '\'' +
+//                "\r\nhttps_first='" + https_first + '\'' +
+//                "\r\nnoProxyList=" + Arrays.toString(getNoProxyList());
+//    }
 }

@@ -169,9 +169,9 @@ public class LocalVpnService extends VpnService implements Runnable {
                     throw new Exception("LocalServer stopped.");
                 }
                 onIPPacketReceived(m_IPHeader, size);
+                if (0 == Integer.parseInt("0")) ;
+                //Thread.sleep(5);
             }
-            //if (true) ;
-            Thread.sleep(5);
         }
         in.close();
         disconnectVPN();

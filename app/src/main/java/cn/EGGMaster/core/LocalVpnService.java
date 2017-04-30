@@ -243,11 +243,11 @@ public class LocalVpnService extends VpnService implements Runnable {
                         //分析数据，找到host
                         if (session.BytesSent == 0 && tcpDataSize > 10) {
                             int headerLength = tcpHeader.m_Offset + tcpHeader.getHeaderLength();
-                            //int dataLength = ipHeader.getDataLength() - tcpHeader.getHeaderLength();
                             String host = HttpHostHeaderParser.parseHost(tcpHeader.m_Data, headerLength, tcpDataSize);
-                            session.isSSL = HttpHostHeaderParser.isSSL;//(tcpHeader.m_Data, headerLength, dataLength);
                             if (session.RemotePort == 80) {
                                 session.isSSL = false;
+                            } else {
+                                session.isSSL = HttpHostHeaderParser.isSSL(tcpHeader.m_Data, headerLength, tcpDataSize);
                             }
                             if (host != null) {
                                 session.RemoteHost = host;

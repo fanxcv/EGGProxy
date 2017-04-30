@@ -6,23 +6,19 @@ import cn.EGGMaster.tcpip.CommonMethods;
 
 
 public class HttpHostHeaderParser {
-    public static boolean isSSL;
 
     public static String parseHost(byte[] buffer, int offset, int count) {
         try {
-            isSSL = false;
             switch (buffer[offset]) {
-                case 'H'://HEAD
-                case 'D'://DELETE
-                case 'O'://OPTIONS
-                case 'T'://TRACE
+//                case 'H'://HEAD
+//                case 'D'://DELETE
+//                case 'O'://OPTIONS
+//                case 'T'://TRACE
                 case 'C'://CONNECT
-                    isSSL = true;
                 case 'G'://GET
                 case 'P'://POST,PUT
                     return getHttpHost(buffer, offset, count);
                 case 0x16://SSL
-                    isSSL = true;
                     return getSNI(buffer, offset, count);
             }
         } catch (Exception e) {
@@ -32,24 +28,19 @@ public class HttpHostHeaderParser {
         return null;
     }
 
-//    public static boolean isSSL(byte[] buffer, int offset, int count) {
-//        try {
-//            switch (buffer[offset]) {
-//                case (byte) 67: //C
-//                case (byte) 68: //D
-//                case (byte) 71: //G
-//                case (byte) 72: //H
-//                case (byte) 79: //O
-//                case (byte) 80: //P
-//                case (byte) 84: //T
-//                    return false;
-//                default:
-//                    return true;
-//            }
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
+    public static boolean isSSL(byte[] buffer, int offset, int count) {
+        try {
+            switch (buffer[offset]) {
+                case 'G'://GET
+                case 'P'://POST,PUT
+                    return false;
+                default:
+                    return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     static String getHttpHost(byte[] buffer, int offset, int count) {
         String headerString = new String(buffer, offset, count);

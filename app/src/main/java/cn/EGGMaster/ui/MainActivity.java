@@ -141,6 +141,7 @@ public class MainActivity extends Activity implements
         if (isEmpty(id)) {
             onLogReceived("你还未选择线路，请先选择线路");
             runFalse();
+            return;
         }
         String result = Utils.sendPost("getLine", "id=" + id);
         Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
@@ -149,6 +150,7 @@ public class MainActivity extends Activity implements
         } else {
             onLogReceived("核心加载配置文件失败，请稍后重试");
             runFalse();
+            return;
         }
         onLogReceived("VPN启动中...");
 
@@ -163,7 +165,6 @@ public class MainActivity extends Activity implements
                 switchProxy.setEnabled(true);
             }
         });
-        return;
     }
 
     @Override
@@ -284,6 +285,8 @@ public class MainActivity extends Activity implements
                             try {
                                 Map<String, String> list = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
                                 info.setText("到期时间：" + list.get("due_time") + "\r\n剩余时间：" + list.get("time") + "天");
+                                user.put("due_time", list.get("due_time"));
+                                user.put("time", list.get("time"));
                             } catch (Exception e) {
                                 onLogReceived("充值失败");
                             }

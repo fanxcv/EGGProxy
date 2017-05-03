@@ -44,7 +44,7 @@ public class HttpConnectTunnel extends Tunnel {
     @Override
     protected void onConnected(ByteBuffer byteBuffer) throws Exception {
         String format = Configer.instance.https_first
-                .replaceAll("\\[V\\]", "HTTP/1.1")
+                .replaceAll("\\[V\\]", "HTTP/1.0")
                 .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[U\\]", "/")
                 .replaceAll("\\[H\\]",

@@ -68,20 +68,4 @@ public class TCPHeader {
 	public int getAckID() {
 		return CommonMethods.readInt(m_Data, m_Offset + offset_ack);
 	}
-
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return String.format("%s%s%s%s%s%s%d->%d %s:%s",
-				(getFlags()&SYN)==SYN?"SYN ":"",
-				(getFlags()&ACK)==ACK?"ACK ":"",
-				(getFlags()&PSH)==PSH?"PSH ":"",
-				(getFlags()&RST)==RST?"RST ":"",
-				(getFlags()&FIN)==FIN?"FIN ":"",
-				(getFlags()&URG)==URG?"URG ":"",
-				getSourcePort()&0xFFFF,
-				getDestinationPort()&0xFFFF,
-				getSeqID(),
-				getAckID());
-	}
 }

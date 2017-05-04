@@ -7,7 +7,6 @@ import java.nio.channels.Selector;
 
 import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
-import cn.EGGMaster.util.StaticVal;
 
 public class HttpConnectTunnel extends Tunnel {
 
@@ -25,15 +24,8 @@ public class HttpConnectTunnel extends Tunnel {
                 this.m_TunnelEstablished = true;
                 super.onTunnelEstablished();
                 return;
-            } else {
-                if (StaticVal.IS_DEBUG)
-                    throw new Exception(String.format("Proxy server responsed an error: %s", new Object[]{new String(byteBuffer.array(), byteBuffer.position(), 12)}));
             }
         }
-    }
-
-    @Override
-    protected void beforeSend(ByteBuffer buffer) throws Exception {
     }
 
     @Override
@@ -48,8 +40,8 @@ public class HttpConnectTunnel extends Tunnel {
                 .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[U\\]", "/")
                 .replaceAll("\\[H\\]",
-                        CommonMethods.ipBytesToString(this.m_DestAddress.getAddress().getAddress())
-                                + ":" + this.m_DestAddress.getPort()
+                        CommonMethods.ipBytesToString(m_DestAddress.getAddress().getAddress())
+                                + ":" + m_DestAddress.getPort()
                 )
                 + "\r\n\r\n";
         byteBuffer.clear();

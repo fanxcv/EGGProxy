@@ -28,8 +28,6 @@ public abstract class Tunnel {
 
     protected abstract boolean isTunnelEstablished();
 
-    protected abstract void beforeSend(ByteBuffer buffer) throws Exception;
-
     protected abstract void afterReceived(ByteBuffer buffer) throws Exception;
 
     protected abstract void onDispose();

@@ -21,10 +21,6 @@ public class RawTunnel extends Tunnel {
     }
 
     @Override
-    protected void beforeSend(ByteBuffer buffer) throws Exception {
-    }
-
-    @Override
     protected void afterReceived(ByteBuffer buffer) throws Exception {
     }
 

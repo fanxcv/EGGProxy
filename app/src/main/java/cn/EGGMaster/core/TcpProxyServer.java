@@ -13,23 +13,22 @@ import cn.EGGMaster.tunnel.Tunnel;
 public class TcpProxyServer implements Runnable {
 
     public boolean Stopped;
-    public short Port;
+    public short Port = 1088;
 
-    Selector m_Selector;
-    ServerSocketChannel m_ServerSocketChannel;
-    Thread m_ServerThread;
+    private Selector m_Selector;
+    private ServerSocketChannel m_ServerSocketChannel;
+    private Thread m_ServerThread;
     private boolean isSSL = false;
 
-    public TcpProxyServer(int port) throws IOException {
+    public TcpProxyServer() throws IOException {
         m_Selector = Selector.open();
         m_ServerSocketChannel = ServerSocketChannel.open();
         m_ServerSocketChannel.configureBlocking(false);
-        m_ServerSocketChannel.socket().bind(new InetSocketAddress(port));
+        m_ServerSocketChannel.socket().bind(new InetSocketAddress(Port));
         m_ServerSocketChannel.register(m_Selector, SelectionKey.OP_ACCEPT);
-        this.Port = (short) m_ServerSocketChannel.socket().getLocalPort();
     }
 
-    InetSocketAddress getDestAddress(SocketChannel localChannel) {
+    private InetSocketAddress getDestAddress(SocketChannel localChannel) {
         short portKey = (short) localChannel.socket().getPort();
         NatSession session = NatSessionManager.getSession(portKey);
         if (session != null) {
@@ -87,7 +86,7 @@ public class TcpProxyServer implements Runnable {
                             } else if (key.isConnectable()) {
                                 ((Tunnel) key.attachment()).onConnectable();
                             } else if (key.isAcceptable()) {
-                                onAccepted(key);
+                                onAccepted();
                             }
                         } catch (Exception e) {
                         }
@@ -103,10 +102,11 @@ public class TcpProxyServer implements Runnable {
     }
 
 
-    void onAccepted(SelectionKey key) {
+    private void onAccepted() {
         Tunnel localTunnel = null;
         try {
             SocketChannel localChannel = m_ServerSocketChannel.accept();
+            localChannel.configureBlocking(false);
             localTunnel = TunnelFactory.wrap(localChannel, m_Selector);
 
             InetSocketAddress destAddress = getDestAddress(localChannel);

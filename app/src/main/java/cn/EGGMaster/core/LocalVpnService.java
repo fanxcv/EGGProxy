@@ -132,15 +132,13 @@ public class LocalVpnService extends VpnService implements Runnable {
             writeLog("安卓版本: %s", Build.VERSION.RELEASE);
             writeLog("App版本: %s", ProxyConfig.AppVersion);
 
-            m_TcpProxyServer = new TcpProxyServer(0);
+            m_TcpProxyServer = new TcpProxyServer();
             m_TcpProxyServer.start();
             writeLog("TCP服务已开启");
 
             m_DnsProxy = new DnsProxy();
             m_DnsProxy.start();
             writeLog("DNS服务已开启");
-
-            //ProxyConfig.Instance.loadFromUrl();
 
             while (true) {
                 if (IsRunning) {
@@ -182,7 +180,7 @@ public class LocalVpnService extends VpnService implements Runnable {
         builder.setMtu(8192);
         builder.addDnsServer("114.114.114.114");
         builder.addRoute("0.0.0.0", 0);
-        builder.setSession("127.0.0.1");
+        builder.setSession("EGGProxyVpn");
         builder.addAddress("10.88.0.2", 32);
 
         LOCAL_IP = CommonMethods.ipStringToInt("10.88.0.2");
@@ -302,14 +300,12 @@ public class LocalVpnService extends VpnService implements Runnable {
         if (m_TcpProxyServer != null) {
             m_TcpProxyServer.stop();
             m_TcpProxyServer = null;
-            writeLog("LocalTcpServer stopped.");
         }
 
         // 停止DNS解析器
         if (m_DnsProxy != null) {
             m_DnsProxy.stop();
             m_DnsProxy = null;
-            writeLog("LocalDnsProxy stopped.");
         }
 
         stopSelf();

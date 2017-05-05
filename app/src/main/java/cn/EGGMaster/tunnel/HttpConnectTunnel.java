@@ -51,7 +51,7 @@ public class HttpConnectTunnel extends Tunnel {
                         CommonMethods.ipBytesToString(this.m_DestAddress.getAddress().getAddress())
                                 + ":" + this.m_DestAddress.getPort()
                 )
-                + "\r\n\r\n";
+                + "\r\n";
         byteBuffer.clear();
         byteBuffer.put(format.getBytes());
         byteBuffer.flip();

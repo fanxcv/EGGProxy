@@ -102,7 +102,6 @@ public class HttpTunnel extends Tunnel {
                     addHeaderString(herders[i]);
                 }
                 buildHeader();
-                System.out.println(header.toString());
                 return ByteBuffer.wrap(header.toString().getBytes());
             }
         }

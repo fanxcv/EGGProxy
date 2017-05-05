@@ -8,11 +8,11 @@ import java.nio.channels.Selector;
 import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
 
-public class HttpConnectTunnel extends Tunnel {
+public class ConnectTunnel extends Tunnel {
 
     private boolean m_TunnelEstablished;
 
-    public HttpConnectTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
+    public ConnectTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
         super(serverAddress, selector);
     }
 
@@ -43,7 +43,7 @@ public class HttpConnectTunnel extends Tunnel {
                         CommonMethods.ipBytesToString(m_DestAddress.getAddress().getAddress())
                                 + ":" + m_DestAddress.getPort()
                 )
-                + "\r\n\r\n";
+                + "\r\n";
         byteBuffer.clear();
         byteBuffer.put(format.getBytes());
         byteBuffer.flip();

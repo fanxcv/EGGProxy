@@ -112,8 +112,8 @@ public class TcpProxyServer implements Runnable {
             InetSocketAddress destAddress = getDestAddress(localChannel);
             if (destAddress != null) {
                 Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, m_Selector, isSSL);
-                remoteTunnel.setBrotherTunnel(localTunnel, false);//关联兄弟
-                localTunnel.setBrotherTunnel(remoteTunnel, true);//关联兄弟
+                remoteTunnel.setBrotherTunnel(localTunnel);//关联兄弟
+                localTunnel.setBrotherTunnel(remoteTunnel);//关联兄弟
                 remoteTunnel.connect(destAddress);//开始连接
             } else {
                 localTunnel.dispose();

@@ -4,9 +4,10 @@ import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import cn.EGGMaster.tunnel.HttpConnectTunnel;
+import cn.EGGMaster.tunnel.HttpTunnel;
 import cn.EGGMaster.tunnel.RawTunnel;
 import cn.EGGMaster.tunnel.Tunnel;
-import cn.EGGMaster.tunnel.HttpConnectTunnel;
 
 import static cn.EGGMaster.core.Configer.allHttps;
 import static cn.EGGMaster.core.Configer.httpAddress;
@@ -25,9 +26,9 @@ public class TunnelFactory {
         } else if (isHttps || allHttps) {
             return new HttpConnectTunnel(httpsAddress, selector);
         } else if (isNet) {
-            return new RawTunnel(destAddress, selector);
+            return new HttpTunnel(destAddress, selector);
         } else {
-            return new RawTunnel(httpAddress, selector);
+            return new HttpTunnel(httpAddress, selector);
         }
     }
 

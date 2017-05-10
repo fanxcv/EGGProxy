@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -127,7 +128,7 @@ public class HttpTunnel extends Tunnel {
 
     private void addHeaderString(String str) {
         str = str.trim();
-        if (str.startsWith("Host") || str.startsWith("host")) {
+        if (str.toLowerCase(Locale.ENGLISH).startsWith("host")) {
             String[] hosts = str.split(":");
             host = hosts[1].trim();
             port = hosts.length == 3 ? hosts[2] : "80";

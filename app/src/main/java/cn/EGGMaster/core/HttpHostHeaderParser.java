@@ -51,9 +51,7 @@ public class HttpHostHeaderParser {
                 String[] nameValueStrings = headerLines[i].split(":");
                 if (nameValueStrings.length == 2) {
                     String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
-                    if ("x-online-host".equals(name)) {
-                        return nameValueStrings[1].trim();
-                    } else if("host".equals(name)){
+                    if("host".equals(name)){
                         return nameValueStrings[1].trim();
                     }
                 }

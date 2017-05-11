@@ -19,18 +19,18 @@ public class Configer {
     private String https_port;
     public static String https_first;
 
-    protected static boolean isNet = false;
-    protected static boolean allHttps = false;
+    static boolean isNet = false;
+    static boolean allHttps = false;
 
-    protected static InetSocketAddress httpAddress;
-    protected static InetSocketAddress httpsAddress;
+    static InetSocketAddress httpAddress;
+    static InetSocketAddress httpsAddress;
 
     private Set<String> noProxyList = new HashSet<String>();
 
     private Configer() {
     }
 
-    public String[] getNoProxyList() {
+    String[] getNoProxyList() {
         if (noProxyList != null && noProxyList.size() != 0)
             return noProxyList.toArray(new String[noProxyList.size()]);
         return null;

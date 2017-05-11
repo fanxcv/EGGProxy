@@ -242,11 +242,6 @@ public class LocalVpnService extends VpnService implements Runnable {
                         if (session.BytesSent == 0 && tcpDataSize > 10) {
                             int headerLength = tcpHeader.m_Offset + tcpHeader.getHeaderLength();
                             String host = HttpHostHeaderParser.parseHost(tcpHeader.m_Data, headerLength, tcpDataSize);
-                            if (session.RemotePort == 80) {
-                                session.isSSL = false;
-                            } else {
-                                session.isSSL = HttpHostHeaderParser.isSSL(tcpHeader.m_Data, headerLength, tcpDataSize);
-                            }
                             if (host != null) {
                                 session.RemoteHost = host;
                             }

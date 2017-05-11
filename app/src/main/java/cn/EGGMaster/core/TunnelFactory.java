@@ -1,13 +1,11 @@
 package cn.EGGMaster.core;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import cn.EGGMaster.tunnel.ConnectTunnel;
-import cn.EGGMaster.tunnel.HttpTunnel;
-import cn.EGGMaster.tunnel.RawTunnel;
-import cn.EGGMaster.tunnel.Tunnel;
+import cn.EGGMaster.Proxy.ConnectTunnel;
+import cn.EGGMaster.Proxy.HttpTunnel;
+import cn.EGGMaster.Proxy.Tunnel;
 
 import static cn.EGGMaster.core.Configer.allHttps;
 import static cn.EGGMaster.core.Configer.httpAddress;
@@ -16,19 +14,19 @@ import static cn.EGGMaster.core.Configer.isNet;
 
 public class TunnelFactory {
 
-    public static Tunnel wrap(SocketChannel channel, Selector selector) {
-        return new RawTunnel(channel, selector);
+    public static Tunnel wrap(SocketChannel channel) {
+        return new Tunnel(channel);
     }
 
-    public static Tunnel createTunnelByConfig(InetSocketAddress destAddress, Selector selector, boolean isHttps) throws Exception {
+    public static Tunnel createTunnelByConfig(InetSocketAddress destAddress, boolean isHttps) throws Exception {
         if (isNoProxy(destAddress.toString())) {
-            return new RawTunnel(destAddress, selector);
+            return new Tunnel(destAddress);
         } else if (isHttps || allHttps) {
-            return new ConnectTunnel(httpsAddress, selector);
+            return new ConnectTunnel(httpsAddress);
         } else if (isNet) {
-            return new HttpTunnel(destAddress, selector);
+            return new HttpTunnel(destAddress);
         } else {
-            return new HttpTunnel(httpAddress, selector);
+            return new HttpTunnel(httpAddress);
         }
     }
 

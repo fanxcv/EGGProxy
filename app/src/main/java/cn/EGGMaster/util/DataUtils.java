@@ -10,18 +10,24 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 import static android.text.TextUtils.isEmpty;
+import static cn.EGGMaster.util.StaticVal.IS_DEBUG;
 
 /**
  * Created by Fan on 2017/4/20.
  */
 
 public class DataUtils extends Utils {
+
+    private static final BlockingQueue<ByteBuffer> byteBufferPool = new ArrayBlockingQueue<>(128);
 
     public static final Gson gson = new Gson();
 
@@ -40,6 +46,25 @@ public class DataUtils extends Utils {
     public static String versionName = null;
     public static String phoneNumber = null;
     public static String phoneIMEI = null;
+
+    public static ByteBuffer getByteBuffer() {
+        try {
+            if (byteBufferPool.isEmpty()) {
+                return ByteBuffer.allocate(8192);
+            } else {
+                return byteBufferPool.take();
+            }
+        } catch (Exception e) {
+            if (IS_DEBUG)
+                e.printStackTrace();
+            return ByteBuffer.allocate(8192);
+        }
+    }
+
+    public static void setByteBuffer(ByteBuffer buffer) {
+        buffer.clear();
+        byteBufferPool.offer(buffer);
+    }
 
     public static boolean initLocalData(Context context) {
         try {

@@ -1,6 +1,7 @@
 package cn.EGGMaster.core;
 
-import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cn.EGGMaster.tcpip.CommonMethods;
 
@@ -28,34 +29,44 @@ public class HttpHostHeaderParser {
         return null;
     }
 
-    public static boolean isSSL(byte[] buffer, int offset, int count) {
-        try {
-            switch (buffer[offset]) {
-                case 'G'://GET
-                case 'P'://POST,PUT
-                    return false;
-                default:
-                    return true;
-            }
-        } catch (Exception e) {
-            return false;
-        }
-    }
+//    public static boolean isSSL(byte[] buffer, int offset, int count) {
+//        try {
+//            switch (buffer[offset]) {
+//                case 'G'://GET
+//                case 'P'://POST,PUT
+//                    return false;
+//                default:
+//                    return true;
+//            }
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
     static String getHttpHost(byte[] buffer, int offset, int count) {
         String headerString = new String(buffer, offset, count);
-        String[] headerLines = headerString.split("\\r\\n");
-        String requestLine = headerLines[0];
-        if (requestLine.startsWith("GET") || requestLine.startsWith("POST")) {
-            for (int i = 1; i < headerLines.length; i++) {
-                String[] nameValueStrings = headerLines[i].split(":");
-                if (nameValueStrings.length == 2) {
-                    String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
-                    if("host".equals(name)){
-                        return nameValueStrings[1].trim();
-                    }
+        String[] headerLines = headerString.split("\\r\\n", 2);
+        if (headerLines[0].startsWith("GET") || headerLines[0].startsWith("POST")) {
+            Pattern xp = Pattern.compile(".*(?i)x-online-host: ([^((\\r\\n)|\\n)]*)");
+            Matcher xm = xp.matcher(headerLines[1]);
+            if (xm.find()) {
+                return xm.group(1).trim();
+            } else {
+                Pattern p = Pattern.compile(".*(?i)host: ([^((\\r\\n)|\\n)]*)");
+                Matcher m = p.matcher(headerLines[1]);
+                if (m.find()) {
+                    return m.group(1).trim();
                 }
             }
+//            for (int i = 1; i < headerLines.length; i++) {
+//                String[] nameValueStrings = headerLines[i].split(":");
+//                if (nameValueStrings.length == 2) {
+//                    String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
+//                    if("host".equals(name)){
+//                        return nameValueStrings[1].trim();
+//                    }
+//                }
+//            }
         }
         return null;
     }

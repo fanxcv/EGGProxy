@@ -8,19 +8,18 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-import cn.EGGMaster.tunnel.Tunnel;
+import cn.EGGMaster.Proxy.Tunnel;
 
 public class TcpProxyServer implements Runnable {
 
-    public boolean Stopped;
-    public short Port = 1088;
+    boolean Stopped;
+    short Port = 1088;
 
-    private Selector m_Selector;
+    public static Selector m_Selector;
     private ServerSocketChannel m_ServerSocketChannel;
     private Thread m_ServerThread;
-    private boolean isSSL = false;
 
-    public TcpProxyServer() throws IOException {
+    TcpProxyServer() throws IOException {
         m_Selector = Selector.open();
         m_ServerSocketChannel = ServerSocketChannel.open();
         m_ServerSocketChannel.configureBlocking(false);
@@ -32,7 +31,6 @@ public class TcpProxyServer implements Runnable {
         short portKey = (short) localChannel.socket().getPort();
         NatSession session = NatSessionManager.getSession(portKey);
         if (session != null) {
-            isSSL = session.isSSL;
             if (ProxyConfig.Instance.needProxy(session.RemoteHost, session.RemoteIP)) {
                 return InetSocketAddress.createUnresolved(session.RemoteHost, session.RemotePort & 0xFFFF);
             } else {
@@ -42,13 +40,13 @@ public class TcpProxyServer implements Runnable {
         return null;
     }
 
-    public void start() {
+    void start() {
         m_ServerThread = new Thread(this);
         m_ServerThread.setName("TcpProxyServerThread");
         m_ServerThread.start();
     }
 
-    public void stop() {
+    void stop() {
         this.Stopped = true;
         if (m_Selector != null) {
             try {
@@ -92,6 +90,7 @@ public class TcpProxyServer implements Runnable {
                         }
                     }
                     keyIterator.remove();
+
                 }
             }
         } catch (Exception e) {
@@ -107,11 +106,11 @@ public class TcpProxyServer implements Runnable {
         try {
             SocketChannel localChannel = m_ServerSocketChannel.accept();
             localChannel.configureBlocking(false);
-            localTunnel = TunnelFactory.wrap(localChannel, m_Selector);
+            localTunnel = TunnelFactory.wrap(localChannel);
 
             InetSocketAddress destAddress = getDestAddress(localChannel);
             if (destAddress != null) {
-                Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, m_Selector, isSSL);
+                Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, destAddress.getPort() != 80);
                 remoteTunnel.setBrotherTunnel(localTunnel);//关联兄弟
                 localTunnel.setBrotherTunnel(remoteTunnel);//关联兄弟
                 remoteTunnel.connect(destAddress);//开始连接

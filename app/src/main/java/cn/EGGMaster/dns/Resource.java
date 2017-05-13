@@ -3,26 +3,26 @@ package cn.EGGMaster.dns;
 import java.nio.ByteBuffer;
 
 public class Resource {
-    public String Domain;
+    private String Domain;
     public short Type;
-    public short Class;
-    public int TTL;
-    public short DataLength;
+    private short Class;
+    private int TTL;
+    private short DataLength;
     public byte[] Data;
 
     private int offset;
 
-    public int Offset() {
-        return offset;
-    }
+//    public int Offset() {
+//        return offset;
+//    }
 
     private int length;
 
-    public int Length() {
-        return length;
-    }
+//    public int Length() {
+//        return length;
+//    }
 
-    public static Resource FromBytes(ByteBuffer buffer) {
+    static Resource FromBytes(ByteBuffer buffer) {
 
         Resource r = new Resource();
         r.offset = buffer.arrayOffset() + buffer.position();
@@ -37,22 +37,21 @@ public class Resource {
         return r;
     }
 
-    public void ToBytes(ByteBuffer buffer) {
-        if (this.Data == null) {
-            this.Data = new byte[0];
-        }
-        this.DataLength = (short) this.Data.length;
-
-        this.offset = buffer.position();
-        DnsPacket.WriteDomain(this.Domain, buffer);
-        buffer.putShort(this.Type);
-        buffer.putShort(this.Class);
-        buffer.putInt(this.TTL);
-
-        buffer.putShort(this.DataLength);
-        buffer.put(this.Data);
-        this.length = buffer.position() - this.offset;
-    }
-
+//    public void ToBytes(ByteBuffer buffer) {
+//        if (this.Data == null) {
+//            this.Data = new byte[0];
+//        }
+//        this.DataLength = (short) this.Data.length;
+//
+//        this.offset = buffer.position();
+//        DnsPacket.WriteDomain(this.Domain, buffer);
+//        buffer.putShort(this.Type);
+//        buffer.putShort(this.Class);
+//        buffer.putInt(this.TTL);
+//
+//        buffer.putShort(this.DataLength);
+//        buffer.put(this.Data);
+//        this.length = buffer.position() - this.offset;
+//    }
 
 }

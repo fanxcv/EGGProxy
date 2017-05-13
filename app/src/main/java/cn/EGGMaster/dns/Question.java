@@ -19,7 +19,7 @@ public class Question {
         return length;
     }
 
-    public static Question FromBytes(ByteBuffer buffer) {
+     static Question FromBytes(ByteBuffer buffer) {
         Question q = new Question();
         q.offset = buffer.arrayOffset() + buffer.position();
         q.Domain = DnsPacket.ReadDomain(buffer, buffer.arrayOffset());
@@ -29,11 +29,11 @@ public class Question {
         return q;
     }
 
-    public void ToBytes(ByteBuffer buffer) {
-        this.offset = buffer.position();
-        DnsPacket.WriteDomain(this.Domain, buffer);
-        buffer.putShort(this.Type);
-        buffer.putShort(this.Class);
-        this.length = buffer.position() - this.offset;
-    }
+//    public void ToBytes(ByteBuffer buffer) {
+//        this.offset = buffer.position();
+//        DnsPacket.WriteDomain(this.Domain, buffer);
+//        buffer.putShort(this.Type);
+//        buffer.putShort(this.Class);
+//        this.length = buffer.position() - this.offset;
+//    }
 }

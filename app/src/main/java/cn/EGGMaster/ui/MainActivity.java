@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -20,7 +21,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.Map;
 
 import cn.EGGMaster.R;
@@ -49,7 +55,6 @@ public class MainActivity extends Activity implements
     private static final int START_VPN_SERVICE_REQUEST_CODE = 1985;
 
     private TextView info;
-    private TextView explain;
     private Switch switchProxy;
     private TextView textViewLog;
     private ScrollView scrollViewLog;
@@ -62,7 +67,7 @@ public class MainActivity extends Activity implements
 
         scrollViewLog = (ScrollView) findViewById(R.id.scrollViewLog);
         textViewLog = (TextView) findViewById(R.id.textViewLog);
-        explain = (TextView) findViewById(R.id.explain);
+        TextView explain = (TextView) findViewById(R.id.explain);
         info = (TextView) findViewById(R.id.info);
 
         textViewLog.setText(GL_HISTORY_LOGS);
@@ -73,8 +78,8 @@ public class MainActivity extends Activity implements
         info.setText("到期时间：" + user.get("due_time") + "\r\n剩余时间：" +
                 ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天"));
 
-        mCalendar = Calendar.getInstance();
         initBufferPool(16);
+        mCalendar = Calendar.getInstance();
         LocalVpnService.addOnStatusChangedListener(this);
     }
 
@@ -138,6 +143,7 @@ public class MainActivity extends Activity implements
     private void startVPNService() {
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
+        onLogReceived(getHostIP());
         SharedPreferences preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
         String id = preferences.getString("lineId", null);
         if (isEmpty(id)) {
@@ -305,6 +311,39 @@ public class MainActivity extends Activity implements
     protected void onDestroy() {
         LocalVpnService.removeOnStatusChangedListener(this);
         super.onDestroy();
+    }
+
+    /**
+     * 获取ip地址
+     *
+     * @return
+     */
+    public static String getHostIP() {
+
+        String hostIp = null;
+        try {
+            Enumeration nis = NetworkInterface.getNetworkInterfaces();
+            InetAddress ia = null;
+            while (nis.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) nis.nextElement();
+                Enumeration<InetAddress> ias = ni.getInetAddresses();
+                while (ias.hasMoreElements()) {
+                    ia = ias.nextElement();
+                    if (ia instanceof Inet6Address) {
+                        continue;// skip ipv6
+                    }
+                    String ip = ia.getHostAddress();
+                    if (!"127.0.0.1".equals(ip)) {
+                        hostIp = ia.getHostAddress();
+                        break;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            Log.i("yao", "SocketException");
+            e.printStackTrace();
+        }
+        return hostIp;
     }
 
 }

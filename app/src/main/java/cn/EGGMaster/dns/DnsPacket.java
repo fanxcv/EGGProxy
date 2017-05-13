@@ -6,8 +6,8 @@ public class DnsPacket {
     public DnsHeader Header;
     public Question[] Questions;
     public Resource[] Resources;
-    public Resource[] AResources;
-    public Resource[] EResources;
+    private Resource[] AResources;
+    private Resource[] EResources;
 
     public int Size;
 
@@ -49,41 +49,41 @@ public class DnsPacket {
         return packet;
     }
 
-    public void ToBytes(ByteBuffer buffer) {
-        Header.QuestionCount = 0;
-        Header.ResourceCount = 0;
-        Header.AResourceCount = 0;
-        Header.EResourceCount = 0;
+//    public void ToBytes(ByteBuffer buffer) {
+//        Header.QuestionCount = 0;
+//        Header.ResourceCount = 0;
+//        Header.AResourceCount = 0;
+//        Header.EResourceCount = 0;
+//
+//        if (Questions != null)
+//            Header.QuestionCount = (short) Questions.length;
+//        if (Resources != null)
+//            Header.ResourceCount = (short) Resources.length;
+//        if (AResources != null)
+//            Header.AResourceCount = (short) AResources.length;
+//        if (EResources != null)
+//            Header.EResourceCount = (short) EResources.length;
+//
+//        this.Header.ToBytes(buffer);
+//
+//        for (int i = 0; i < Header.QuestionCount; i++) {
+//            this.Questions[i].ToBytes(buffer);
+//        }
+//
+//        for (int i = 0; i < Header.ResourceCount; i++) {
+//            this.Resources[i].ToBytes(buffer);
+//        }
+//
+//        for (int i = 0; i < Header.AResourceCount; i++) {
+//            this.AResources[i].ToBytes(buffer);
+//        }
+//
+//        for (int i = 0; i < Header.EResourceCount; i++) {
+//            this.EResources[i].ToBytes(buffer);
+//        }
+//    }
 
-        if (Questions != null)
-            Header.QuestionCount = (short) Questions.length;
-        if (Resources != null)
-            Header.ResourceCount = (short) Resources.length;
-        if (AResources != null)
-            Header.AResourceCount = (short) AResources.length;
-        if (EResources != null)
-            Header.EResourceCount = (short) EResources.length;
-
-        this.Header.ToBytes(buffer);
-
-        for (int i = 0; i < Header.QuestionCount; i++) {
-            this.Questions[i].ToBytes(buffer);
-        }
-
-        for (int i = 0; i < Header.ResourceCount; i++) {
-            this.Resources[i].ToBytes(buffer);
-        }
-
-        for (int i = 0; i < Header.AResourceCount; i++) {
-            this.AResources[i].ToBytes(buffer);
-        }
-
-        for (int i = 0; i < Header.EResourceCount; i++) {
-            this.EResources[i].ToBytes(buffer);
-        }
-    }
-
-    public static String ReadDomain(ByteBuffer buffer, int dnsHeaderOffset) {
+    static String ReadDomain(ByteBuffer buffer, int dnsHeaderOffset) {
         StringBuilder sb = new StringBuilder();
         int len = 0;
         while (buffer.hasRemaining() && (len = (buffer.get() & 0xFF)) > 0) {
@@ -111,8 +111,8 @@ public class DnsPacket {
         return sb.toString();
     }
 
-    public static void WriteDomain(String domain, ByteBuffer buffer) {
-        if (domain == null || domain == "") {
+    static void WriteDomain(String domain, ByteBuffer buffer) {
+        if (domain == null || "".equals(domain)) {
             buffer.put((byte) 0);
             return;
         }

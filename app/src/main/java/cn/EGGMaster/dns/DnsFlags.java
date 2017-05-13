@@ -1,16 +1,16 @@
 package cn.EGGMaster.dns;
 
-public class DnsFlags {
-    public boolean QR;//1 bits
-    public int OpCode;//4 bits
-    public boolean AA;//1 bits
-    public boolean TC;//1 bits
-    public boolean RD;//1 bits
-    public boolean RA;//1 bits
-    public int Zero;//3 bits
-    public int Rcode;//4 bits
+class DnsFlags {
+    private boolean QR;//1 bits
+    private int OpCode;//4 bits
+    private boolean AA;//1 bits
+    private boolean TC;//1 bits
+    private boolean RD;//1 bits
+    private boolean RA;//1 bits
+    private int Zero;//3 bits
+    private int Rcode;//4 bits
 
-    public static DnsFlags Parse(short value) {
+    static DnsFlags Parse(short value) {
         int m_Flags = value & 0xFFFF;
         DnsFlags flags = new DnsFlags();
         flags.QR = ((m_Flags >> 7) & 0x01) == 1;
@@ -24,7 +24,7 @@ public class DnsFlags {
         return flags;
     }
 
-    public short ToShort() {
+    short ToShort() {
         int m_Flags = 0;
         m_Flags |= (this.QR ? 1 : 0) << 7;
         m_Flags |= (this.OpCode & 0x0F) << 3;

@@ -18,42 +18,40 @@ import cn.EGGMaster.tcpip.IPHeader;
 import cn.EGGMaster.tcpip.UDPHeader;
 
 
-public class DnsProxy implements Runnable {
+class DnsProxy implements Runnable {
 
     private class QueryState {
-        public short ClientQueryID;
-        public long QueryNanoTime;
-        public int ClientIP;
-        public short ClientPort;
-        public int RemoteIP;
-        public short RemotePort;
+        short ClientQueryID;
+        long QueryNanoTime;
+        int ClientIP;
+        short ClientPort;
+        int RemoteIP;
+        short RemotePort;
     }
 
-    public boolean Stopped;
-    private static final ConcurrentHashMap<Integer, String> IPDomainMaps = new ConcurrentHashMap<Integer, String>();
-    private static final ConcurrentHashMap<String, Integer> DomainIPMaps = new ConcurrentHashMap<String, Integer>();
-    private final long QUERY_TIMEOUT_NS = 10 * 1000000000L;
+    boolean Stopped;
+    private static final ConcurrentHashMap<Integer, String> IPDomainMaps = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Integer> DomainIPMaps = new ConcurrentHashMap<>();
     private DatagramSocket m_Client;
-    private Thread m_ReceivedThread;
     private short m_QueryID;
-    private SparseArray<QueryState> m_QueryArray;
+    private final SparseArray<QueryState> m_QueryArray;
 
-    public DnsProxy() throws IOException {
-        m_QueryArray = new SparseArray<QueryState>();
+    DnsProxy() throws IOException {
+        m_QueryArray = new SparseArray<>();
         m_Client = new DatagramSocket(0);
     }
 
-    public static String reverseLookup(int ip) {
+    static String reverseLookup(int ip) {
         return IPDomainMaps.get(ip);
     }
 
-    public void start() {
-        m_ReceivedThread = new Thread(this);
+    void start() {
+        Thread m_ReceivedThread = new Thread(this);
         m_ReceivedThread.setName("DnsProxyThread");
         m_ReceivedThread.start();
     }
 
-    public void stop() {
+    void stop() {
         Stopped = true;
         if (m_Client != null) {
             m_Client.close();
@@ -104,8 +102,7 @@ public class DnsProxy implements Runnable {
         for (int i = 0; i < dnsPacket.Header.ResourceCount; i++) {
             Resource resource = dnsPacket.Resources[i];
             if (resource.Type == 1) {
-                int ip = CommonMethods.readInt(resource.Data, 0);
-                return ip;
+                return CommonMethods.readInt(resource.Data, 0);
             }
         }
         return 0;
@@ -160,7 +157,7 @@ public class DnsProxy implements Runnable {
     }
 
     private void OnDnsResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
-        QueryState state = null;
+        QueryState state;
         synchronized (m_QueryArray) {
             state = m_QueryArray.get(dnsPacket.Header.ID);
             if (state != null) {
@@ -220,13 +217,14 @@ public class DnsProxy implements Runnable {
         long now = System.nanoTime();
         for (int i = m_QueryArray.size() - 1; i >= 0; i--) {
             QueryState state = m_QueryArray.valueAt(i);
+            long QUERY_TIMEOUT_NS = 10 * 1000000000L;
             if ((now - state.QueryNanoTime) > QUERY_TIMEOUT_NS) {
                 m_QueryArray.removeAt(i);
             }
         }
     }
 
-    public void onDnsRequestReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
+    void onDnsRequestReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
         if (!interceptDns(ipHeader, udpHeader, dnsPacket)) {
             //转发DNS
             QueryState state = new QueryState();

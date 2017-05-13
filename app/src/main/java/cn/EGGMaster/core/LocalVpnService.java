@@ -59,7 +59,7 @@ public class LocalVpnService extends VpnService implements Runnable {
     @Override
     public void onCreate() {
         try {
-            m_TcpProxyServer = new TcpProxyServer(1088);
+            m_TcpProxyServer = new TcpProxyServer();
             m_TcpProxyServer.start();
             writeLog("TCP服务已启动");
 

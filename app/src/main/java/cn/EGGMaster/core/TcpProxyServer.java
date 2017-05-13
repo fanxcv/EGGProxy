@@ -14,18 +14,17 @@ import cn.EGGMaster.tunnel.Tunnel;
 class TcpProxyServer implements Runnable {
 
     boolean Stopped;
-    short Port;
+    short Port = 1088;
 
     private Selector m_Selector;
     private ServerSocketChannel m_ServerSocketChannel;
 
-    TcpProxyServer(int port) throws IOException {
+    TcpProxyServer() throws IOException {
         m_Selector = Selector.open();
         m_ServerSocketChannel = ServerSocketChannel.open();
         m_ServerSocketChannel.configureBlocking(false);
-        m_ServerSocketChannel.socket().bind(new InetSocketAddress(port));
+        m_ServerSocketChannel.socket().bind(new InetSocketAddress(Port));
         m_ServerSocketChannel.register(m_Selector, SelectionKey.OP_ACCEPT);
-        this.Port = (short) m_ServerSocketChannel.socket().getLocalPort();
     }
 
     synchronized void start() {

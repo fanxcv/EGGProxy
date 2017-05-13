@@ -55,7 +55,6 @@ public class DataUtils extends Utils {
             connBuffer = ByteBuffer.allocate(1536);
             ConnBufferPool.offer(connBuffer);
         }
-        String a = "a";
     }
 
     public static ByteBuffer getByteBuffer() {
@@ -105,7 +104,7 @@ public class DataUtils extends Utils {
             }
             if (isEmpty(phoneIMEI)) {
                 phoneIMEI = tm.getDeviceId();
-                if (isEmpty(phoneIMEI) || "null".equalsIgnoreCase(phoneIMEI)) {
+                if (isEmpty(phoneIMEI) || "null".equals(phoneIMEI)) {
                     return false;
                 }
             }
@@ -130,8 +129,6 @@ public class DataUtils extends Utils {
     }
 
     private static boolean isNullMap(Map<String, String> map) {
-        if (map == null || map.size() == 0)
-            return true;
-        return false;
+        return map == null || map.size() == 0;
     }
 }

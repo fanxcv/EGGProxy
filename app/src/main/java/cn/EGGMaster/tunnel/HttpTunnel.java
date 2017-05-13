@@ -15,6 +15,8 @@ import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
 
 import static android.text.TextUtils.isEmpty;
+import static cn.EGGMaster.util.StaticVal.METHOD_GET;
+import static cn.EGGMaster.util.StaticVal.METHOD_POST;
 
 public class HttpTunnel extends Tunnel {
 
@@ -24,9 +26,6 @@ public class HttpTunnel extends Tunnel {
     private String version;
 
     private StringBuffer header;
-
-    private final String METHOD_GET = "GET";
-    private final String METHOD_POST = "POST";
 
     public HttpTunnel(InetSocketAddress serverAddress, Selector selector, String remoteHost) throws Exception {
         super(serverAddress, selector);

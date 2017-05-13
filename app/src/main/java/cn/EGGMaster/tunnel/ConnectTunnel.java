@@ -75,7 +75,7 @@ public class ConnectTunnel extends Tunnel {
     }
 
     private void onConnected(ByteBuffer byteBuffer) throws Exception {
-        String format = Configer.instance.https_first
+        String format = Configer.https_first
                 .replaceAll("\\[V\\]", "HTTP/1.0")
                 .replaceAll("\\[M\\]", "CONNECT")
                 .replaceAll("\\[U\\]", "/")

@@ -1,7 +1,6 @@
 package cn.EGGMaster.tunnel;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
@@ -16,21 +15,8 @@ public class RawTunnel extends Tunnel {
     }
 
     @Override
-    protected void onConnected(ByteBuffer buffer) throws Exception {
-        onTunnelEstablished();
-    }
-
-    @Override
-    protected void afterReceived(ByteBuffer buffer) throws Exception {
-    }
-
-    @Override
     protected boolean isTunnelEstablished() {
         return true;
-    }
-
-    @Override
-    protected void onDispose() {
     }
 
 }

@@ -12,24 +12,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.EGGMaster.core.Configer;
+import cn.EGGMaster.tcpip.CommonMethods;
 
 import static android.text.TextUtils.isEmpty;
 
 public class HttpTunnel extends Tunnel {
 
     private String host;
-    private String port;
     private String path;
     private String method;
     private String version;
 
-    private StringBuffer header = new StringBuffer();
+    private StringBuffer header;
 
     private final String METHOD_GET = "GET";
     private final String METHOD_POST = "POST";
 
-    public HttpTunnel(InetSocketAddress serverAddress, Selector selector) throws Exception {
+    public HttpTunnel(InetSocketAddress serverAddress, Selector selector, String remoteHost) throws Exception {
         super(serverAddress, selector);
+        this.host = remoteHost != null ? remoteHost :
+                CommonMethods.ipBytesToString(m_DestAddress.getAddress().getAddress()) + ":" + m_DestAddress.getPort();
     }
 
     @Override
@@ -61,21 +63,8 @@ public class HttpTunnel extends Tunnel {
     }
 
     @Override
-    protected void onConnected(ByteBuffer buffer) throws Exception {
-        onTunnelEstablished();
-    }
-
-    @Override
-    protected void afterReceived(ByteBuffer buffer) throws Exception {
-    }
-
-    @Override
     protected boolean isTunnelEstablished() {
         return true;
-    }
-
-    @Override
-    protected void onDispose() {
     }
 
     private String getString(ByteBuffer buffer) {
@@ -93,61 +82,55 @@ public class HttpTunnel extends Tunnel {
     }
 
     private ByteBuffer HeaderProcess(ByteBuffer buffer) {
-        String request = getString(buffer).trim();
-        if (!isEmpty(request) && (request.startsWith(METHOD_GET) || request.startsWith(METHOD_POST))) {
-            header.setLength(0);
+        String request = getString(buffer);
+        if (!isEmpty(request) && getMethod(request)) {
             String[] herders = request.split("\\r\\n");
+            header = new StringBuffer();
             addHeaderMethod(herders[0]);
-            if (!isEmpty(method)) {
-                for (int i = 1; i < herders.length; i++) {
-                    addHeaderString(herders[i]);
-                }
-                buildHeader();
-                return ByteBuffer.wrap(header.toString().getBytes());
+            for (int i = 1; i < herders.length; i++) {
+                addHeaderString(herders[i]);
             }
+            buildHeader();
+            return ByteBuffer.wrap(header.toString().getBytes());
         }
         return buffer;
     }
 
-    private void addHeaderMethod(String str) {
-        str = str.trim();
+    private boolean getMethod(String str) {
+        str = str.substring(0, 10).trim();
         if (str.startsWith(METHOD_GET)) {
             method = METHOD_GET;
+            return true;
         } else if (str.startsWith(METHOD_POST)) {
             method = METHOD_POST;
+            return true;
         }
+        return false;
+    }
+
+    private void addHeaderMethod(String str) {
         if (!isEmpty(method)) {
             Pattern p = Pattern.compile("([a-zA-Z ]*?://)?([^/]*)(.*) (HTTP/.*)$");
             Matcher m = p.matcher(str);
             if (m.find()) {
-                path = m.group(3);
-                version = m.group(4);
+                path = m.group(3).trim();
+                version = m.group(4).trim();
             }
         }
     }
 
     private void addHeaderString(String str) {
-        str = str.trim();
-        if (str.toLowerCase(Locale.ENGLISH).startsWith("host")) {
-            String[] hosts = str.split(":");
-            host = hosts[1].trim();
-            port = hosts.length == 3 ? hosts[2] : "80";
-        }
-        if (str.indexOf(':') != -1) {
-            String head = str.substring(0, str.indexOf(':'));
-            for (final String s : Configer.http_del) {
-                if (s.trim().equalsIgnoreCase(head)) {
-                    return;
-                }
+        int i;
+        if ((i = str.indexOf(':')) >= 0) {
+            String head = "'|" + str.substring(0, i).trim().toLowerCase(Locale.ENGLISH) + "|'";
+            if (Configer.http_del.contains(head)) {
+                return;
             }
         }
-        header.append(str).append("\r\n");
+        header.append(str.trim()).append("\r\n");
     }
 
     private void buildHeader() {
-        if (port != null && !"80".equals(port)) {
-            host = host + ":" + port;
-        }
         header.insert(0, Configer.http_first
                 .replaceAll("\\[M\\]", method)
                 .replaceAll("\\[V\\]", version)

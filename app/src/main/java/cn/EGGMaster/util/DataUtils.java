@@ -19,7 +19,6 @@ import java.util.concurrent.BlockingQueue;
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 import static android.text.TextUtils.isEmpty;
-import static cn.EGGMaster.util.StaticVal.IS_DEBUG;
 
 /**
  * Created by Fan on 2017/4/20.
@@ -27,7 +26,8 @@ import static cn.EGGMaster.util.StaticVal.IS_DEBUG;
 
 public class DataUtils extends Utils {
 
-    private static final BlockingQueue<ByteBuffer> byteBufferPool = new ArrayBlockingQueue<>(128);
+    private static final BlockingQueue<ByteBuffer> byteBufferPool = new ArrayBlockingQueue<>(1024);
+    private static final BlockingQueue<ByteBuffer> ConnBufferPool = new ArrayBlockingQueue<>(1024);
 
     public static final Gson gson = new Gson();
 
@@ -47,23 +47,43 @@ public class DataUtils extends Utils {
     public static String phoneNumber = null;
     public static String phoneIMEI = null;
 
+    public static void initBufferPool(int num) {
+        ByteBuffer byteBuffer, connBuffer;
+        for (int i = 0; i < num; i++) {
+            byteBuffer = ByteBuffer.allocate(8192);
+            byteBufferPool.offer(byteBuffer);
+            connBuffer = ByteBuffer.allocate(1536);
+            ConnBufferPool.offer(connBuffer);
+        }
+        String a = "a";
+    }
+
     public static ByteBuffer getByteBuffer() {
         try {
-            if (byteBufferPool.isEmpty()) {
-                return ByteBuffer.allocate(8192);
-            } else {
-                return byteBufferPool.take();
-            }
+            if (!byteBufferPool.isEmpty()) return byteBufferPool.take();
         } catch (Exception e) {
-            if (IS_DEBUG)
-                e.printStackTrace();
-            return ByteBuffer.allocate(8192);
+            //
         }
+        return ByteBuffer.allocate(8192);
     }
 
     public static void setByteBuffer(ByteBuffer buffer) {
         buffer.clear();
         byteBufferPool.offer(buffer);
+    }
+
+    public static ByteBuffer getConnBuffer() {
+        try {
+            if (!ConnBufferPool.isEmpty()) return ConnBufferPool.take();
+        } catch (Exception e) {
+            //
+        }
+        return ByteBuffer.allocate(1536);
+    }
+
+    public static void setConnBuffer(ByteBuffer buffer) {
+        buffer.clear();
+        ConnBufferPool.offer(buffer);
     }
 
     public static boolean initLocalData(Context context) {
@@ -80,7 +100,7 @@ public class DataUtils extends Utils {
                     appInstallID = UUID.randomUUID().toString();
                     Editor editor = preferences.edit();
                     editor.putString("AppInstallID", appInstallID);
-                    editor.commit();
+                    editor.apply();
                 }
             }
             if (isEmpty(phoneIMEI)) {

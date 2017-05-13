@@ -1,10 +1,10 @@
 package cn.EGGMaster.core;
 
-public class NatSession {
-    public int RemoteIP;
-    public short RemotePort;
-    public String RemoteHost;
-    public int BytesSent;
-    public int PacketSent;
-    public long LastNanoTime;
+class NatSession {
+    int RemoteIP;
+    short RemotePort;
+    String RemoteHost;
+    int BytesSent;
+    int PacketSent;
+    long LastNanoTime;
 }

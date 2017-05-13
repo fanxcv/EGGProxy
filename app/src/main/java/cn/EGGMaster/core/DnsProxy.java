@@ -134,7 +134,7 @@ public class DnsProxy implements Runnable {
         if (fakeIP == null) {
             int hashIP = domainString.hashCode();
             do {
-                fakeIP = ProxyConfig.FAKE_NETWORK_IP | (hashIP & 0x0000FFFF);
+                fakeIP = Configer.FAKE_NETWORK_IP | (hashIP & 0x0000FFFF);
                 hashIP++;
             } while (IPDomainMaps.containsKey(fakeIP));
 
@@ -149,7 +149,7 @@ public class DnsProxy implements Runnable {
             Question question = dnsPacket.Questions[0];
             if (question.Type == 1) {
                 int realIP = getFirstIP(dnsPacket);
-                if (ProxyConfig.Instance.needProxy(question.Domain, realIP)) {
+                if (Configer.instance.needProxy(realIP)) {
                     int fakeIP = getOrCreateFakeIP(question.Domain);
                     tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
                     return true;
@@ -198,7 +198,7 @@ public class DnsProxy implements Runnable {
         Question question = dnsPacket.Questions[0];
 //		System.out.println("DNS Qeury "+question.Domain);
         if (question.Type == 1) {
-            if (ProxyConfig.Instance.needProxy(question.Domain, getIPFromCache(question.Domain))) {
+            if (Configer.instance.needProxy(getIPFromCache(question.Domain))) {
                 int fakeIP = getOrCreateFakeIP(question.Domain);
                 tamperDnsResponse(ipHeader.m_Data, dnsPacket, fakeIP);
                 int sourceIP = ipHeader.getSourceIP();

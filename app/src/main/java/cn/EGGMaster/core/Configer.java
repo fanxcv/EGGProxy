@@ -1,8 +1,9 @@
 package cn.EGGMaster.core;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Locale;
+
+import cn.EGGMaster.tcpip.CommonMethods;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -12,8 +13,9 @@ public class Configer {
 
     private String http_ip;
     private String http_port;
-    public static String[] http_del;
+    public static String http_del;
     public static String http_first;
+    private static String[] http_dels;
 
     private String https_ip;
     private String https_port;
@@ -25,18 +27,24 @@ public class Configer {
     static InetSocketAddress httpAddress;
     static InetSocketAddress httpsAddress;
 
-    private Set<String> noProxyList = new HashSet<String>();
+//    public static String noProxyListString;
+//    private Set<String> noProxyList = new HashSet<>();
+
+    public static final Configer instance = new Configer();
+
+    private final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
+    final static int FAKE_NETWORK_IP = CommonMethods.ipStringToInt("26.25.0.0");
 
     private Configer() {
     }
 
-    String[] getNoProxyList() {
-        if (noProxyList != null && noProxyList.size() != 0)
-            return noProxyList.toArray(new String[noProxyList.size()]);
-        return null;
+    static boolean isFakeIP(int ip) {
+        return (ip & FAKE_NETWORK_MASK) == FAKE_NETWORK_IP;
     }
 
-    public static final Configer instance = new Configer();
+    boolean needProxy(int ip) {
+        return isFakeIP(ip);
+    }
 
     /**
      * 读取配置文件生成对象
@@ -61,7 +69,7 @@ public class Configer {
                             http_port = formatString(params[1]);
                             break;
                         case "http_del":
-                            http_del = formatString(params[1]).split(",");
+                            http_dels = formatString(params[1]).split(",");
                             break;
                         case "http_first":
                             http_first = genericFirstLine(formatString(params[1]));
@@ -111,7 +119,7 @@ public class Configer {
                         https_first = genericFirstLine(formatString(line + "\\r\\n"));
                     }
                 }
-                http_del = new String[]{"Host", "X-Online-Host"};
+                http_dels = new String[]{"Host", "X-Online-Host"};
                 break;
             default:
                 return false;
@@ -121,19 +129,24 @@ public class Configer {
         else if ("wap_https".equals(mode))
             allHttps = true;
 
-        noProxyList.add("127.0.");
-        noProxyList.add("192.168.");
         if (!isEmpty(http_ip)) {
-            noProxyList.add(http_ip);
+//            noProxyList.add(http_ip);
             httpAddress = new InetSocketAddress(http_ip, Integer.parseInt(http_port));
         }
         if (!isEmpty(https_ip)) {
-            noProxyList.add(https_ip);
+//            noProxyList.add(https_ip);
             httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
-        if (isEmpty(http_first) || isEmpty(https_first))
-            return false;
-        return true;
+//        if (!noProxyList.isEmpty())
+//            noProxyListString = Arrays.toString(noProxyList.toArray(new String[noProxyList.size()]));
+        StringBuffer sb = new StringBuffer();
+        if (http_dels.length > 0)
+            for (final String s : http_dels) {
+                sb.append("'|").append(s).append("|'");
+            }
+        http_del = sb.toString().toLowerCase(Locale.ENGLISH);
+
+        return !(isEmpty(http_first) || isEmpty(https_first));
     }
 
     private String formatString(String str) {

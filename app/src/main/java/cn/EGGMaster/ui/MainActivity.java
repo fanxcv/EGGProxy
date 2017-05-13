@@ -35,6 +35,7 @@ import static cn.EGGMaster.util.DataUtils.TYPE;
 import static cn.EGGMaster.util.DataUtils.admin;
 import static cn.EGGMaster.util.DataUtils.app;
 import static cn.EGGMaster.util.DataUtils.gson;
+import static cn.EGGMaster.util.DataUtils.initBufferPool;
 import static cn.EGGMaster.util.DataUtils.phoneIMEI;
 import static cn.EGGMaster.util.DataUtils.user;
 import static cn.EGGMaster.util.Utils.sendPost;
@@ -73,6 +74,7 @@ public class MainActivity extends Activity implements
                 ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天"));
 
         mCalendar = Calendar.getInstance();
+        initBufferPool(16);
         LocalVpnService.addOnStatusChangedListener(this);
     }
 
@@ -247,7 +249,7 @@ public class MainActivity extends Activity implements
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 LocalVpnService.IsRunning = false;
-                                LocalVpnService.Instance.disconnectVPN();
+                                LocalVpnService.Instance.dispose();
                                 stopService(new Intent(MainActivity.this, LocalVpnService.class));
                                 System.runFinalization();
                                 System.exit(0);

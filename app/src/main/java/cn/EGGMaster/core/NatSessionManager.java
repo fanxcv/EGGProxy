@@ -4,17 +4,21 @@ import android.util.SparseArray;
 
 import cn.EGGMaster.tcpip.CommonMethods;
 
-public class NatSessionManager {
+class NatSessionManager {
 
-    static final int MAX_SESSION_COUNT = 90;
-    static final long SESSION_TIMEOUT_NS = 60 * 1000000000L;
-    static final SparseArray<NatSession> Sessions = new SparseArray<NatSession>();
+    private static final int MAX_SESSION_COUNT = 4096;
+    private static final long SESSION_TIMEOUT_NS = 120 * 1000000000L;
+    private static final SparseArray<NatSession> Sessions = new SparseArray<>();
 
-    public static NatSession getSession(int portKey) {
+    static NatSession getSession(int portKey) {
         return Sessions.get(portKey);
     }
 
-    static void clearExpiredSessions() {
+    static int getSessionCount() {
+        return Sessions.size();
+    }
+
+    private static void clearExpiredSessions() {
         long now = System.nanoTime();
         for (int i = Sessions.size() - 1; i >= 0; i--) {
             NatSession session = Sessions.valueAt(i);
@@ -24,7 +28,11 @@ public class NatSessionManager {
         }
     }
 
-    public static NatSession createSession(int portKey, int remoteIP, short remotePort) {
+    static void clearAllSessions() {
+        Sessions.clear();
+    }
+
+    static NatSession createSession(int portKey, int remoteIP, short remotePort) {
         if (Sessions.size() > MAX_SESSION_COUNT) {
             clearExpiredSessions();
         }
@@ -34,7 +42,7 @@ public class NatSessionManager {
         session.RemoteIP = remoteIP;
         session.RemotePort = remotePort;
 
-        if (ProxyConfig.isFakeIP(remoteIP)) {
+        if (Configer.isFakeIP(remoteIP)) {
             session.RemoteHost = DnsProxy.reverseLookup(remoteIP);
         }
 

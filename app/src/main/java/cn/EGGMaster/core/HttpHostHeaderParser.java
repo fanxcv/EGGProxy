@@ -5,15 +5,11 @@ import java.util.Locale;
 import cn.EGGMaster.tcpip.CommonMethods;
 
 
-public class HttpHostHeaderParser {
+class HttpHostHeaderParser {
 
-    public static String parseHost(byte[] buffer, int offset, int count) {
+    static String parseHost(byte[] buffer, int offset, int count) {
         try {
             switch (buffer[offset]) {
-//                case 'H'://HEAD
-//                case 'D'://DELETE
-//                case 'O'://OPTIONS
-//                case 'T'://TRACE
                 case 'C'://CONNECT
                 case 'G'://GET
                 case 'P'://POST,PUT
@@ -22,47 +18,26 @@ public class HttpHostHeaderParser {
                     return getSNI(buffer, offset, count);
             }
         } catch (Exception e) {
-            //e.printStackTrace();
-            //LocalVpnService.Instance.writeLog("Error: parseHost:%s", e);
+            //
         }
         return null;
     }
 
-    public static boolean isSSL(byte[] buffer, int offset, int count) {
-        try {
-            switch (buffer[offset]) {
-                case 'G'://GET
-                case 'P'://POST,PUT
-                    return false;
-                default:
-                    return true;
-            }
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    static String getHttpHost(byte[] buffer, int offset, int count) {
+    private static String getHttpHost(byte[] buffer, int offset, int count) {
         String headerString = new String(buffer, offset, count);
-        String[] headerLines = headerString.split("\\r\\n");
-        String requestLine = headerLines[0];
-        if (requestLine.startsWith("GET") || requestLine.startsWith("POST")) {
-            for (int i = 1; i < headerLines.length; i++) {
-                String[] nameValueStrings = headerLines[i].split(":");
-                if (nameValueStrings.length == 2) {
-                    String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
-                    if ("x-online-host".equals(name)) {
-                        return nameValueStrings[1].trim();
-                    } else if("host".equals(name)){
-                        return nameValueStrings[1].trim();
-                    }
-                }
+        String[] headerLines = headerString.split("\\r\\n", 2);
+        if (headerLines[0].startsWith("GET") || headerLines[0].startsWith("POST")) {
+            int i;
+            if ((i = headerLines[1].toLowerCase(Locale.ENGLISH).indexOf("x-online-host")) >= 0) {
+                return headerLines[1].substring(i + 14, headerLines[1].indexOf("\r\n", i)).trim();
+            } else if ((i = headerLines[1].toLowerCase(Locale.ENGLISH).indexOf("host")) >= 0) {
+                return headerLines[1].substring(i + 5, headerLines[1].indexOf("\r\n", i)).trim();
             }
         }
         return null;
     }
 
-    static String getSNI(byte[] buffer, int offset, int count) {
+    private static String getSNI(byte[] buffer, int offset, int count) {
         int limit = offset + count;
         if (count > 43 && buffer[offset] == 0x16) {//TLS Client Hello
             offset += 43;//skip 43 bytes header
@@ -107,8 +82,7 @@ public class HttpHostHeaderParser {
                     offset += 5;//skip SNI header.
                     length -= 5;//SNI size;
                     if (offset + length > limit) return null;
-                    String serverName = new String(buffer, offset, length);
-                    return serverName;
+                    return new String(buffer, offset, length);
                 } else {
                     offset += length;
                 }

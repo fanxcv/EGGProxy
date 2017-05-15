@@ -10,62 +10,48 @@ import java.util.Iterator;
 
 import cn.EGGMaster.tunnel.Tunnel;
 
-public class TcpProxyServer implements Runnable {
 
-    public boolean Stopped;
-    public short Port;
+class TcpProxyServer implements Runnable {
 
-    Selector m_Selector;
-    ServerSocketChannel m_ServerSocketChannel;
-    Thread m_ServerThread;
-    private boolean isSSL = false;
+    boolean Stopped;
+    short Port = 1088;
 
-    public TcpProxyServer(int port) throws IOException {
+    private Selector m_Selector;
+    private ServerSocketChannel m_ServerSocketChannel;
+
+    TcpProxyServer() throws IOException {
         m_Selector = Selector.open();
         m_ServerSocketChannel = ServerSocketChannel.open();
         m_ServerSocketChannel.configureBlocking(false);
-        m_ServerSocketChannel.socket().bind(new InetSocketAddress(port));
+        m_ServerSocketChannel.socket().bind(new InetSocketAddress(Port));
         m_ServerSocketChannel.register(m_Selector, SelectionKey.OP_ACCEPT);
-        this.Port = (short) m_ServerSocketChannel.socket().getLocalPort();
     }
 
-    InetSocketAddress getDestAddress(SocketChannel localChannel) {
-        short portKey = (short) localChannel.socket().getPort();
-        NatSession session = NatSessionManager.getSession(portKey);
-        if (session != null) {
-            isSSL = session.isSSL;
-            if (ProxyConfig.Instance.needProxy(session.RemoteHost, session.RemoteIP)) {
-                return InetSocketAddress.createUnresolved(session.RemoteHost, session.RemotePort & 0xFFFF);
-            } else {
-                return new InetSocketAddress(localChannel.socket().getInetAddress(), session.RemotePort & 0xFFFF);
-            }
-        }
-        return null;
-    }
-
-    public void start() {
-        m_ServerThread = new Thread(this);
+    synchronized void start() {
+        Thread m_ServerThread = new Thread(this);
         m_ServerThread.setName("TcpProxyServerThread");
         m_ServerThread.start();
     }
 
-    public void stop() {
+    synchronized void stop() {
         this.Stopped = true;
         if (m_Selector != null) {
             try {
                 m_Selector.close();
-                m_Selector = null;
             } catch (Exception e) {
-                e.printStackTrace();
+                //
+            } finally {
+                m_Selector = null;
             }
         }
 
         if (m_ServerSocketChannel != null) {
             try {
                 m_ServerSocketChannel.close();
-                m_ServerSocketChannel = null;
             } catch (Exception e) {
-                e.printStackTrace();
+                //
+            } finally {
+                m_ServerSocketChannel = null;
             }
         }
     }
@@ -87,39 +73,55 @@ public class TcpProxyServer implements Runnable {
                             } else if (key.isConnectable()) {
                                 ((Tunnel) key.attachment()).onConnectable();
                             } else if (key.isAcceptable()) {
-                                onAccepted(key);
+                                onAccepted();
                             }
                         } catch (Exception e) {
+                            //
                         }
                     }
                     keyIterator.remove();
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //
         } finally {
             this.stop();
         }
     }
 
+    private NatSession getNatSession(SocketChannel localChannel) {
+        return NatSessionManager.getSession((short) localChannel.socket().getPort());
+    }
 
-    void onAccepted(SelectionKey key) {
+    private InetSocketAddress getDestAddress(NatSession session, SocketChannel localChannel) {
+        if (session != null) {
+            if (Configer.instance.needProxy(session.RemoteIP)) {
+                return InetSocketAddress.createUnresolved(session.RemoteHost, session.RemotePort & 0xFFFF);
+            } else {
+                return new InetSocketAddress(localChannel.socket().getInetAddress(), session.RemotePort & 0xFFFF);
+            }
+        }
+        return null;
+    }
+
+    private void onAccepted() {
         Tunnel localTunnel = null;
         try {
             SocketChannel localChannel = m_ServerSocketChannel.accept();
             localTunnel = TunnelFactory.wrap(localChannel, m_Selector);
 
-            InetSocketAddress destAddress = getDestAddress(localChannel);
+            NatSession session = getNatSession(localChannel);
+            InetSocketAddress destAddress = getDestAddress(session, localChannel);
             if (destAddress != null) {
-                Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, m_Selector, isSSL);
-                remoteTunnel.setBrotherTunnel(localTunnel, false);//关联兄弟
-                localTunnel.setBrotherTunnel(remoteTunnel, true);//关联兄弟
-                remoteTunnel.connect(destAddress);//开始连接
+                Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, m_Selector, session.RemoteHost, destAddress.getPort() != 80);
+                remoteTunnel.setBrotherTunnel(localTunnel);
+                localTunnel.setBrotherTunnel(remoteTunnel);
+                remoteTunnel.connect(destAddress);
             } else {
                 localTunnel.dispose();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             if (localTunnel != null) {
                 localTunnel.dispose();
             }

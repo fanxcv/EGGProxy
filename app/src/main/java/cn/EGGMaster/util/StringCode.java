@@ -5,12 +5,13 @@ import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import static cn.EGGMaster.util.StaticVal.strDefaultKey;
+
 public class StringCode {
 
     /**
      * 字符串默认键值
      */
-    private static final String strDefaultKey = "defaultProxyKey";
     private static StringCode code = null;
     private Cipher encryptCipher = null;
     private Cipher decryptCipher = null;
@@ -28,7 +29,7 @@ public class StringCode {
     public static synchronized StringCode getInstance() {
         try {
             if (code == null) {
-                code = new StringCode(strDefaultKey);
+                code = new StringCode(getStr(strDefaultKey));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,8 +84,7 @@ public class StringCode {
         try {
             return byteArr2HexStr(encrypt(strIn.getBytes()));
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return "";
         }
     }
 
@@ -96,8 +96,41 @@ public class StringCode {
         try {
             return new String(decrypt(hexStr2ByteArr(strIn)));
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return "";
+        }
+    }
+
+//    private static String byteToStr(byte[] arrB) throws Exception {
+//        StringBuffer sb = new StringBuffer(arrB.length * 2);
+//        for (byte anArrB : arrB) {
+//            int intTmp = anArrB;
+//            while (intTmp < 0) {
+//                intTmp = intTmp + 256;
+//            }
+//            if (intTmp < 16) {
+//                sb.append("0");
+//            }
+//            sb.append(Integer.toString(intTmp + 2, 16));
+//        }
+//        return sb.toString();
+//    }
+
+    private static byte[] strToByte(String strIn) throws Exception {
+        byte[] arrB = strIn.getBytes();
+        int iLen = arrB.length;
+        byte[] arrOut = new byte[arrB.length / 2];
+        for (int i = 0; i < iLen; i = i + 2) {
+            String strTmp = new String(arrB, i, 2);
+            arrOut[i / 2] = (byte) (Integer.parseInt(strTmp, 16) - 2);
+        }
+        return arrOut;
+    }
+
+    public static String getStr(String hex) {
+        try {
+            return new String(strToByte(hex), "utf-8");
+        } catch (Exception e) {
+            return "";
         }
     }
 }

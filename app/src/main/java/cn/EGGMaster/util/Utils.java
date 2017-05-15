@@ -6,13 +6,12 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static cn.EGGMaster.util.StaticVal.INDEX;
-
 /**
  * Created by Fan on 2017/4/4.
  */
 
 public class Utils {
+    private static final String INDEX = StringCode.getStr(StaticVal.INDEX);
 
     /**
      * POST请求数据

@@ -4,10 +4,15 @@
 #include "Core.h"
 
 void loadConfTiny(char *conf);
+
 void loadConfFmns(char *conf);
+
 void loadTiny(char *str);
+
 void loadFmns(char *str);
+
 char *trimVal(char *src);
+
 char *trim(char *src);
 
 extern char _mode[16];

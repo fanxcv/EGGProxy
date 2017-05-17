@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.EGGMaster.core.Configer;
-import cn.EGGMaster.tcpip.CommonMethods;
 
 import static android.text.TextUtils.isEmpty;
 import static cn.EGGMaster.util.StaticVal.METHOD_GET;
@@ -29,8 +28,7 @@ public class HttpTunnel extends Tunnel {
 
     public HttpTunnel(InetSocketAddress serverAddress, Selector selector, String remoteHost) throws Exception {
         super(serverAddress, selector);
-        this.host = remoteHost != null ? remoteHost :
-                CommonMethods.ipBytesToString(m_DestAddress.getAddress().getAddress()) + ":" + m_DestAddress.getPort();
+        this.host = remoteHost != null ? remoteHost : null;
     }
 
     @Override
@@ -121,8 +119,17 @@ public class HttpTunnel extends Tunnel {
     private void addHeaderString(String str) {
         int i;
         if ((i = str.indexOf(':')) >= 0) {
-            String head = "'|" + str.substring(0, i).trim().toLowerCase(Locale.ENGLISH) + "|'";
-            if (Configer.http_del.contains(head)) {
+            String head = str.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
+            if (host == null) {
+                int j = str.length();
+                if ("x-online-host".equals(head)) {
+                    host = str.substring(++i, j);
+                } else if ("host".equals(head)) {
+                    host = str.substring(++i, j);
+                }
+            }
+            String header = "'|" + head + "|'";
+            if (Configer.http_del.contains(header)) {
                 return;
             }
         }

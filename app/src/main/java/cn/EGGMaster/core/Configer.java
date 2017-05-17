@@ -49,6 +49,9 @@ public class Configer {
         http_first = JniUtils.getConfString(100131);
         https_first = JniUtils.getConfString(100132);
 
+        isNet = JniUtils.getConfBoolean(StaticVal.ISNET);
+        allHttps = JniUtils.getConfBoolean(StaticVal.ALLHTTPS);
+
         if (!isEmpty(JniUtils.getConfString(StaticVal.HTTP_IP))) {
             httpAddress = new InetSocketAddress(JniUtils.getConfString(StaticVal.HTTP_IP), Integer.parseInt(JniUtils.getConfString(StaticVal.HTTP_PORT)));
         }
@@ -92,16 +95,15 @@ public class Configer {
         return !(isEmpty(http_first) || isEmpty(https_first));
     }
 
-//    @Override
-//    public String toString() {
-//        return "\r\nmode='" + mode + '\'' +
-//                "\r\nhttp_ip='" + http_ip + '\'' +
-//                "\r\nhttp_port='" + http_port + '\'' +
-//                "\r\nhttp_del=" + Arrays.toString(http_del) +
-//                "\r\nhttp_first='" + http_first + '\'' +
-//                "\r\nhttps_ip='" + https_ip + '\'' +
-//                "\r\nhttps_port='" + https_port + '\'' +
-//                "\r\nhttps_first='" + https_first + '\'' +
-//                "\r\nnoProxyList=" + Arrays.toString(getNoProxyList());
-//    }
+    @Override
+    public String toString() {
+        return "\r\nisNet='" + (isNet ? "true" : "false") + '\'' +
+                "\r\nhttp_ip='" + JniUtils.getConfString(StaticVal.HTTP_IP) + '\'' +
+                "\r\nhttp_port='" + JniUtils.getConfString(StaticVal.HTTP_PORT) + '\'' +
+                "\r\nhttp_del=" + http_del +
+                "\r\nhttp_first='" + http_first + '\'' +
+                "\r\nhttps_ip='" + JniUtils.getConfString(StaticVal.HTTPS_IP) + '\'' +
+                "\r\nhttps_port='" + JniUtils.getConfString(StaticVal.HTTPS_PORT) + '\'' +
+                "\r\nhttps_first='" + https_first + '\'';
+    }
 }

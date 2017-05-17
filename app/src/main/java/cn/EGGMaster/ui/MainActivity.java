@@ -155,6 +155,7 @@ public class MainActivity extends Activity implements
         Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
         if (line != null && Configer.instance.readConf(line.get("value"), line.get("type") + "")) {
             onLogReceived("核心启动成功");
+            onLogReceived(Configer.instance.toString());
         } else {
             onLogReceived("核心加载配置文件失败，请稍后重试");
             runFalse();

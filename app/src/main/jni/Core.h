@@ -7,8 +7,8 @@
 
 #define LOG_TAG "ndk-test"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 #ifndef _Included_cn_EGGMaster_util_JniUtils
 #define _Included_cn_EGGMaster_util_JniUtils
@@ -32,21 +32,22 @@ extern "C" {
  * Method:    loadConf
  * Signature: (Ljava/lang/String;I)Z
  */
-JNIEXPORT jboolean JNICALL Java_cn_EGGMaster_util_JniUtils_loadConf (JNIEnv *, jclass, jstring, jint);
+JNIEXPORT jboolean JNICALL
+Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *, jclass, jstring, jint);
 
 /*
  * Class:     cn_eggyun_ndk_JniUtils
  * Method:    getConfString
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_getConfString (JNIEnv *, jclass, jint);
+JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *, jclass, jint);
 
 /*
  * Class:     cn_eggyun_ndk_JniUtils
  * Method:    getConfBoolean
  * Signature: (I)Z
  */
-JNIEXPORT jboolean JNICALL Java_cn_EGGMaster_util_JniUtils_getConfBoolean (JNIEnv *, jclass, jint);
+JNIEXPORT jboolean JNICALL Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

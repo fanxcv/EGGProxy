@@ -2,6 +2,7 @@
 // Created by Administrator on 2017/5/17 0017.
 //
 #include "Core.h"
+#include <ctype.h>
 
 void loadConfTiny(char *conf);
 
@@ -14,6 +15,10 @@ void loadFmns(char *str);
 char *trimVal(char *src);
 
 char *trim(char *src);
+
+char *formatFirst(char *src);
+
+char *replaceAll(const char *string, const char *substr, const char *replacement);
 
 extern char _mode[16];
 extern char _del_h[1024];
@@ -59,13 +64,17 @@ void loadTiny(char *str) {
         } else if (strcasecmp(trim(key), "http_port") == 0) {
             strcpy(_port_h, trimVal(val));
         } else if (strcasecmp(trim(key), "http_first") == 0) {
-            strcpy(_first_h, trimVal(val));
+            char *p = formatFirst(trimVal(val));
+            strcpy(_first_h, p);
+            free(p);
         } else if (strcasecmp(trim(key), "https_ip") == 0) {
             strcpy(_host_s, trimVal(val));
         } else if (strcasecmp(trim(key), "https_port") == 0) {
             strcpy(_port_s, trimVal(val));
         } else if (strcasecmp(trim(key), "https_first") == 0) {
-            strcpy(_first_s, trimVal(val));
+            char *p = formatFirst(trimVal(val));
+            strcpy(_first_s, p);
+            free(p);
         } else if (strcasecmp(trim(key), "http_del") == 0) {
             char *cl = "'|", *cr = "|'";
             char *inner_val, *inner_ptr = NULL;
@@ -96,13 +105,17 @@ void loadFmns(char *str) {
         } else if (strcasecmp(trim(key), "http_port") == 0) {
             strcpy(_port_h, trimVal(val));
         } else if (strcasecmp(trim(key), "http_first") == 0) {
-            strcpy(_first_h, trimVal(val));
+            char *p = formatFirst(trimVal(val));
+            strcpy(_first_h, p);
+            free(p);
         } else if (strcasecmp(trim(key), "https_ip") == 0) {
             strcpy(_host_s, trimVal(val));
         } else if (strcasecmp(trim(key), "https_port") == 0) {
             strcpy(_port_s, trimVal(val));
         } else if (strcasecmp(trim(key), "https_first") == 0) {
-            strcpy(_first_s, trimVal(val));
+            char *p = formatFirst(trimVal(val));
+            strcpy(_first_s, p);
+            free(p);
         } else if (strcasecmp(trim(key), "http_del") == 0) {
             char *cl = "'|", *cr = "|'";
             char *inner_val, *inner_ptr = NULL;
@@ -118,6 +131,35 @@ void loadFmns(char *str) {
             }
         }
     }
+}
+
+char *formatFirst(char *src) {
+    LOGI("1 : %s", src);
+    char *a, *b, *c, *d, *e, *f, *g, *h, *i, *j, *k;
+    a = replaceAll(src, "[version]", "[V]");
+    b = replaceAll(a, "[method]", "[M]");
+    free(a);
+    c = replaceAll(b, "[host]", "[H]");
+    free(b);
+    d = replaceAll(c, "[uri]", "[U]");
+    free(c);
+    e = replaceAll(d, "[MTD]", "[M]");
+    free(d);
+    f = replaceAll(e, "[Rr]", "\r");
+    free(e);
+    g = replaceAll(f, "[Nn]", "\n");
+    free(f);
+    h = replaceAll(g, "[Tt]", "\t");
+    free(g);
+    i = replaceAll(h, "\\r", "\r");
+    free(h);
+    j = replaceAll(i, "\\n", "\n");
+    free(i);
+    k = replaceAll(j, "\\t", "\t");
+    free(j);
+
+    LOGI("1 : %s", k);
+    return k;
 }
 
 char *trim(char *src) {
@@ -176,4 +218,34 @@ char *trimVal(char *src) {
     *src = '\0';
 
     return ori_src;
+}
+
+char *replaceAll(const char *string, const char *substr, const char *replacement) {
+    char *tok = NULL;
+    char *newstr = NULL;
+    char *oldstr = NULL;
+
+    /* if either substr or replacement is NULL, duplicate string a let caller handle it */
+    if (substr == NULL || replacement == NULL)
+        return strdup(string);
+
+    newstr = strdup(string);
+    while ((tok = strstr(newstr, substr))) {
+        oldstr = newstr;
+        newstr = malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
+        /*failed to alloc mem, free old string and return NULL */
+        if (newstr == NULL) {
+            free(oldstr);
+            return NULL;
+        }
+        memcpy(newstr, oldstr, tok - oldstr);
+        memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
+        memcpy(newstr + (tok - oldstr) + strlen(replacement), tok + strlen(substr),
+               strlen(oldstr) - strlen(substr) - (tok - oldstr));
+        memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
+
+        free(oldstr);
+    }
+
+    return newstr;
 }

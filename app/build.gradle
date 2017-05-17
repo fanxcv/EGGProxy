@@ -10,6 +10,12 @@ android {
         versionCode 1
         versionName "1.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            moduleName "Core"//生成的so名字
+            ldLibs "log"//实现__android_log_print
+            abiFilters "armeabi-v7a","arm64-v8a"//输出指定三种abi体系结构下的so库。目前可有可无。
+        }
     }
 
     buildTypes {

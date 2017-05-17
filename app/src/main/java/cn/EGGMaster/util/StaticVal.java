@@ -5,7 +5,7 @@ package cn.EGGMaster.util;
  */
 
 public class StaticVal {
-    public static final boolean IS_DEBUG = true;
+    public static final boolean IS_DEBUG = false;
     public static final String METHOD_GET = "GET";
     public static final String METHOD_POST = "POST";
 

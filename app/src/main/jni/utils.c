@@ -22,6 +22,12 @@ char *getHost(char *str);
 
 char *strlower(char *src);
 
+char *delHeader(char *src, char *delstr);
+
+int startWith(char *src, char *str);
+
+void resFstLine(char *src, char **url, char **version);
+
 char *replaceAll(const char *string, const char *substr, const char *replacement);
 
 extern char _mode[16];
@@ -80,19 +86,19 @@ void loadTiny(char *str) {
             strcpy(_first_s, p);
             free(p);
         } else if (strcasecmp(trim(key), "http_del") == 0) {
-            char *cl = "'|", *cr = "|'";
-            char *inner_val, *inner_ptr = NULL;
-            if ((inner_val = strtok_r(trimVal(val), ",", &inner_ptr)) != NULL) {
-                strcpy(_del_h, cl);
-                strcat(_del_h, strlower(trimVal(inner_val)));
-                strcat(_del_h, cr);
-                while ((inner_val = strtok_r(NULL, ",", &inner_ptr)) != NULL) {
-                    strcat(_del_h, cl);
-                    strcat(_del_h, strlower(trimVal(inner_val)));
-                    strcat(_del_h, cr);
-                }
-            }
-
+//            char *cl = "'|", *cr = "|'";
+//            char *inner_val, *inner_ptr = NULL;
+//            if ((inner_val = strtok_r(trimVal(val), ",", &inner_ptr)) != NULL) {
+//                strcpy(_del_h, cl);
+//                strcat(_del_h, strlower(trimVal(inner_val)));
+//                strcat(_del_h, cr);
+//                while ((inner_val = strtok_r(NULL, ",", &inner_ptr)) != NULL) {
+//                    strcat(_del_h, cl);
+//                    strcat(_del_h, strlower(trimVal(inner_val)));
+//                    strcat(_del_h, cr);
+//                }
+//            }
+            strcpy(_del_h, trimVal(val));
         }
     }
 }
@@ -237,8 +243,8 @@ char *replaceAll(const char *src, const char *findstr, const char *replacestr) {
     char *newstr = NULL;
     char *oldstr = NULL;
 
-    size_t findlen = (int) strlen(findstr);
-    size_t replacelen = (int) strlen(replacestr);
+    size_t findlen = strlen(findstr);
+    size_t replacelen = strlen(replacestr);
 
     if (findstr == NULL || replacestr == NULL)
         return strdup(src);
@@ -246,7 +252,7 @@ char *replaceAll(const char *src, const char *findstr, const char *replacestr) {
     newstr = strdup(src);
     while ((tok = strstr(newstr, findstr))) {
         oldstr = newstr;
-        newstr = malloc(strlen(oldstr) - strlen(findstr) + strlen(replacestr) + 1);
+        newstr = malloc(strlen(oldstr) - findlen + replacelen + 1);
         if (newstr == NULL) {
             free(oldstr);
             return NULL;
@@ -263,18 +269,73 @@ char *replaceAll(const char *src, const char *findstr, const char *replacestr) {
     return newstr;
 }
 
+void resFstLine(char *src, char **url, char **version) {
+    char *fork = NULL;
+    fork = strstr(trim(src), " ");
+    size_t len = strlen(fork);
+    *version = malloc(len);
+    memcpy(*version, fork + 1, len - 1);
+    memset(*version + (len - 1), 0, 1);
+    if (startWith(src, "/")) {
+        *url = malloc((fork - src) + 1);
+        memcpy(*url, src, fork - src);
+        memset(*url + (fork - src), 0, 1);
+    } else {
+        char *p = strstr(strstr(src, "://"), "/");
+        if (p <= fork) {
+            *url = malloc((fork - p) + 1);
+            memcpy(*url, p, fork - src);
+            memset(*url + (fork - p), 0, 1);
+        }
+    }
+
+}
+
 char *getHost(char *str) {
     char *fork = NULL, *host = NULL;
     if ((fork = strcasestr(str, "x-online-host"))) {
         unsigned long len = strstr(fork, "\r\n") - (fork + 14);
         host = malloc(len + 1);
         memcpy(host, fork + 14, len);
-        memset(host + len, '\0', 1);
+        memset(host + len, 0, 1);
     } else if ((fork = strcasestr(str, "host"))) {
         unsigned long len = strstr(fork, "\r\n") - (fork + 5);
         host = malloc(len + 1);
         memcpy(host, fork + 5, len);
-        memset(host + len, '\0', 1);
+        memset(host + len, 0, 1);
     }
     return host ? trim(host) : host;
+}
+
+int startWith(char *src, char *str) {
+    for (; *src != '\0' && *str != '\0'; src++, str++)
+        if (*src != *str) return 0;
+    return 1;
+}
+
+char *delHeader(char *src, char *delstr) {
+    char *inner_ptr, *ns = NULL;
+    if (!delstr || strcmp(src, "\n\r\n") == 0) return src;
+    char *del = strtok_r(delstr, ",", &inner_ptr);
+    if (!del || strcmp(src, "\n\r\n") == 0) return src;
+    size_t srclen = strlen(src);
+    char *find = NULL, *fork = NULL;
+    if ((find = strcasestr(src, del))) {
+        if (*(find - 1) == '\n') {
+            fork = strchr(find, '\r');
+            size_t i = srclen - (fork - find) - 2;
+            ns = malloc(i + 1);
+            if ((find - 1) == src) {
+                memcpy(ns, fork + 1, i);
+            } else {
+                memcpy(ns, src, find - 1 - src);
+                memcpy(ns + (find - 1 - src), fork + 1, i - (find - 1 - src));
+            }
+            memset(ns + i, 0, 1);
+            free(src);
+        }
+    } else {
+        ns = src;
+    }
+    return delHeader(ns, inner_ptr);
 }

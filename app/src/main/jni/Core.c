@@ -6,6 +6,14 @@ extern void loadConfFmns(char *conf);
 
 extern char *getHost(char *str);
 
+extern char *trim(char *src);
+
+extern int startWith(char *src, char *str);
+
+extern char *delHeader(char *src, char *delstr);
+
+extern void resFstLine(char *src, char **url, char **version);
+
 char _mode[16];
 char _del_h[1024];
 int _is_net, _all_https;
@@ -93,4 +101,27 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
     jstring ns = (*env)->NewStringUTF(env, host);
     free(host);
     return ns;
+}
+
+JNIEXPORT jstring JNICALL
+Java_cn_EGGMaster_util_JniUtils_headerProcess(JNIEnv *env, jobject obj, jstring header) {
+
+    char *cHeader = (char *) (*env)->GetStringUTFChars(env, header, NULL);
+
+    char *p, *out_ptr = NULL, *del = NULL;
+    char *method, *host = NULL, *url = NULL, *version = NULL, *other = NULL;
+
+    if ((p = strtok_r(cHeader, "\r\n", &out_ptr)) != NULL) {
+        if (startWith(p, "GET")) {
+            method = "GET";
+            resFstLine(p + 4, &url, &version);
+        } else if (startWith(p, "POST")) {
+            method = "POST";
+            resFstLine(p + 5, &url, &version);
+        }
+        host = getHost(out_ptr);
+        char *dels = strdup(_del_h);
+        // other = delHeader(strdup(out_ptr), dels);
+    }
+
 }

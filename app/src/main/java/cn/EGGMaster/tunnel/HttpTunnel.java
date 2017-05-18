@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.EGGMaster.core.Configer;
+import cn.EGGMaster.util.JniUtils;
 
 import static android.text.TextUtils.isEmpty;
 import static cn.EGGMaster.util.StaticVal.METHOD_GET;
@@ -26,14 +27,13 @@ public class HttpTunnel extends Tunnel {
 
     private StringBuffer header;
 
-    public HttpTunnel(InetSocketAddress serverAddress, Selector selector, String remoteHost) throws Exception {
+    public HttpTunnel(InetSocketAddress serverAddress, Selector selector) throws Exception {
         super(serverAddress, selector);
-        this.host = remoteHost != null ? remoteHost : null;
     }
 
     @Override
     protected boolean write(ByteBuffer buffer, boolean copyRemainData) throws Exception {
-        ByteBuffer m_Buffer = HeaderProcess(buffer);
+        ByteBuffer m_Buffer = headerProcess(buffer);
         int bytesSent;
         while (m_Buffer.hasRemaining()) {
             bytesSent = m_InnerChannel.write(m_Buffer);
@@ -78,9 +78,10 @@ public class HttpTunnel extends Tunnel {
         }
     }
 
-    private ByteBuffer HeaderProcess(ByteBuffer buffer) {
+    private ByteBuffer headerProcess(ByteBuffer buffer) {
         String request = getString(buffer);
-        if (!isEmpty(request) && getMethod(request)) {
+        if (!isEmpty(request) && getMethod(request.substring(0, 10).trim())) {
+            JniUtils.headerProcess(request);
             String[] herders = request.split("\\r\\n");
             header = new StringBuffer();
             addHeaderMethod(herders[0]);
@@ -94,15 +95,7 @@ public class HttpTunnel extends Tunnel {
     }
 
     private boolean getMethod(String str) {
-        str = str.substring(0, 10).trim();
-        if (str.startsWith(METHOD_GET)) {
-            method = METHOD_GET;
-            return true;
-        } else if (str.startsWith(METHOD_POST)) {
-            method = METHOD_POST;
-            return true;
-        }
-        return false;
+        return str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST);
     }
 
     private void addHeaderMethod(String str) {

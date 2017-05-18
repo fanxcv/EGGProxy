@@ -37,6 +37,8 @@ JNIEXPORT jboolean JNICALL Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv
 
 JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *, jclass, jstring);
 
+JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_headerProcess(JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

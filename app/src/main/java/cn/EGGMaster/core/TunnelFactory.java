@@ -27,9 +27,9 @@ class TunnelFactory {
         if (isHttps || allHttps) {
             return new ConnectTunnel(httpsAddress, selector, remoteHost);
         } else if (isNet) {
-            return new HttpTunnel(destAddress, selector, remoteHost);
+            return new HttpTunnel(destAddress, selector);
         } else {
-            return new HttpTunnel(httpAddress, selector, remoteHost);
+            return new HttpTunnel(httpAddress, selector);
         }
     }
 }

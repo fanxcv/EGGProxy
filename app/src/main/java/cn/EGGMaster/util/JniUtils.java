@@ -18,4 +18,6 @@ public class JniUtils {
 
     public static native String getHost(String header);
 
+    public static native String headerProcess(String header);
+
 }

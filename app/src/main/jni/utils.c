@@ -18,6 +18,10 @@ char *trim(char *src);
 
 char *formatFirst(char *src);
 
+char *getHost(char *str);
+
+char *strlower(char *src);
+
 char *replaceAll(const char *string, const char *substr, const char *replacement);
 
 extern char _mode[16];
@@ -80,14 +84,15 @@ void loadTiny(char *str) {
             char *inner_val, *inner_ptr = NULL;
             if ((inner_val = strtok_r(trimVal(val), ",", &inner_ptr)) != NULL) {
                 strcpy(_del_h, cl);
-                strcat(_del_h, trimVal(inner_val));
+                strcat(_del_h, strlower(trimVal(inner_val)));
                 strcat(_del_h, cr);
                 while ((inner_val = strtok_r(NULL, ",", &inner_ptr)) != NULL) {
                     strcat(_del_h, cl);
-                    strcat(_del_h, trimVal(inner_val));
+                    strcat(_del_h, strlower(trimVal(inner_val)));
                     strcat(_del_h, cr);
                 }
             }
+
         }
     }
 }
@@ -121,11 +126,11 @@ void loadFmns(char *str) {
             char *inner_val, *inner_ptr = NULL;
             if ((inner_val = strtok_r(trimVal(val), ",", &inner_ptr)) != NULL) {
                 strcpy(_del_h, cl);
-                strcat(_del_h, trimVal(inner_val));
+                strcat(_del_h, strlower(trimVal(inner_val)));
                 strcat(_del_h, cr);
                 while ((inner_val = strtok_r(NULL, ",", &inner_ptr)) != NULL) {
                     strcat(_del_h, cl);
-                    strcat(_del_h, trimVal(inner_val));
+                    strcat(_del_h, strlower(trimVal(inner_val)));
                     strcat(_del_h, cr);
                 }
             }
@@ -133,8 +138,16 @@ void loadFmns(char *str) {
     }
 }
 
+char *strlower(char *src) {
+    char s[strlen(src) + 1];
+    strcpy(s, src);
+    char *p = s;
+    for (; *p != '\0'; p++)
+        *p = (char) tolower(*p);
+    return s;
+}
+
 char *formatFirst(char *src) {
-    LOGI("1 : %s", src);
     char *a, *b, *c, *d, *e, *f, *g, *h, *i, *j, *k;
     a = replaceAll(src, "[version]", "[V]");
     b = replaceAll(a, "[method]", "[M]");
@@ -158,7 +171,6 @@ char *formatFirst(char *src) {
     k = replaceAll(j, "\\t", "\t");
     free(j);
 
-    LOGI("1 : %s", k);
     return k;
 }
 
@@ -220,32 +232,49 @@ char *trimVal(char *src) {
     return ori_src;
 }
 
-char *replaceAll(const char *string, const char *substr, const char *replacement) {
+char *replaceAll(const char *src, const char *findstr, const char *replacestr) {
     char *tok = NULL;
     char *newstr = NULL;
     char *oldstr = NULL;
 
-    /* if either substr or replacement is NULL, duplicate string a let caller handle it */
-    if (substr == NULL || replacement == NULL)
-        return strdup(string);
+    size_t findlen = (int) strlen(findstr);
+    size_t replacelen = (int) strlen(replacestr);
 
-    newstr = strdup(string);
-    while ((tok = strstr(newstr, substr))) {
+    if (findstr == NULL || replacestr == NULL)
+        return strdup(src);
+
+    newstr = strdup(src);
+    while ((tok = strstr(newstr, findstr))) {
         oldstr = newstr;
-        newstr = malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
-        /*failed to alloc mem, free old string and return NULL */
+        newstr = malloc(strlen(oldstr) - strlen(findstr) + strlen(replacestr) + 1);
         if (newstr == NULL) {
             free(oldstr);
             return NULL;
         }
         memcpy(newstr, oldstr, tok - oldstr);
-        memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
-        memcpy(newstr + (tok - oldstr) + strlen(replacement), tok + strlen(substr),
-               strlen(oldstr) - strlen(substr) - (tok - oldstr));
-        memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
+        memcpy(newstr + (tok - oldstr), replacestr, replacelen);
+        memcpy(newstr + (tok - oldstr) + replacelen, tok + findlen,
+               strlen(oldstr) - findlen - (tok - oldstr));
+        memset(newstr + strlen(oldstr) - findlen + replacelen, 0, 1);
 
         free(oldstr);
     }
 
     return newstr;
+}
+
+char *getHost(char *str) {
+    char *fork = NULL, *host = NULL;
+    if ((fork = strcasestr(str, "x-online-host"))) {
+        unsigned long len = strstr(fork, "\r\n") - (fork + 14);
+        host = malloc(len + 1);
+        memcpy(host, fork + 14, len);
+        memset(host + len, '\0', 1);
+    } else if ((fork = strcasestr(str, "host"))) {
+        unsigned long len = strstr(fork, "\r\n") - (fork + 5);
+        host = malloc(len + 1);
+        memcpy(host, fork + 5, len);
+        memset(host + len, '\0', 1);
+    }
+    return host ? trim(host) : host;
 }

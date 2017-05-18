@@ -95,15 +95,15 @@ public class Configer {
         return !(isEmpty(http_first) || isEmpty(https_first));
     }
 
-    @Override
-    public String toString() {
-        return "\r\nisNet='" + (isNet ? "true" : "false") + '\'' +
-                "\r\nhttp_ip='" + JniUtils.getConfString(StaticVal.HTTP_IP) + '\'' +
-                "\r\nhttp_port='" + JniUtils.getConfString(StaticVal.HTTP_PORT) + '\'' +
-                "\r\nhttp_del=" + http_del +
-                "\r\nhttp_first='" + http_first + '\'' +
-                "\r\nhttps_ip='" + JniUtils.getConfString(StaticVal.HTTPS_IP) + '\'' +
-                "\r\nhttps_port='" + JniUtils.getConfString(StaticVal.HTTPS_PORT) + '\'' +
-                "\r\nhttps_first='" + https_first + '\'';
-    }
+//    @Override
+//    public String toString() {
+//        return "\r\nisNet='" + (isNet ? "true" : "false") + '\'' +
+//                "\r\nhttp_ip='" + JniUtils.getConfString(StaticVal.HTTP_IP) + '\'' +
+//                "\r\nhttp_port='" + JniUtils.getConfString(StaticVal.HTTP_PORT) + '\'' +
+//                "\r\nhttp_del=" + http_del +
+//                "\r\nhttp_first='" + http_first + '\'' +
+//                "\r\nhttps_ip='" + JniUtils.getConfString(StaticVal.HTTPS_IP) + '\'' +
+//                "\r\nhttps_port='" + JniUtils.getConfString(StaticVal.HTTPS_PORT) + '\'' +
+//                "\r\nhttps_first='" + https_first + '\'';
+//    }
 }

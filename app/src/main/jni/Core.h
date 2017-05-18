@@ -27,27 +27,15 @@ extern "C" {
 #define HTTPS_IP 100121
 #undef HTTPS_PORT
 #define HTTPS_PORT 100122
-/*
- * Class:     cn_eggyun_ndk_JniUtils
- * Method:    loadConf
- * Signature: (Ljava/lang/String;I)Z
- */
+
 JNIEXPORT jboolean JNICALL
 Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *, jclass, jstring, jint);
 
-/*
- * Class:     cn_eggyun_ndk_JniUtils
- * Method:    getConfString
- * Signature: (I)Ljava/lang/String;
- */
 JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *, jclass, jint);
 
-/*
- * Class:     cn_eggyun_ndk_JniUtils
- * Method:    getConfBoolean
- * Signature: (I)Z
- */
 JNIEXPORT jboolean JNICALL Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *, jclass, jint);
+
+JNIEXPORT jstring JNICALL Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus
 }

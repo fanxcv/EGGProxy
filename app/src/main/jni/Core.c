@@ -4,6 +4,8 @@ extern void loadConfTiny(char *conf);
 
 extern void loadConfFmns(char *conf);
 
+extern char *getHost(char *str);
+
 char _mode[16];
 char _del_h[1024];
 int _is_net, _all_https;
@@ -80,4 +82,15 @@ Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *env, jobject obj, jint ty
             break;
     }
     return 0;
+}
+
+JNIEXPORT jstring JNICALL
+Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
+
+    char *s = (char *) (*env)->GetStringUTFChars(env, str, NULL);
+    char *host = getHost(s);
+    (*env)->ReleaseStringUTFChars(env, str, s);
+    jstring ns = (*env)->NewStringUTF(env, host);
+    free(host);
+    return ns;
 }

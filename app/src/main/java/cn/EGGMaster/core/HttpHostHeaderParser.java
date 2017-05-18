@@ -1,8 +1,7 @@
 package cn.EGGMaster.core;
 
-import java.util.Locale;
-
 import cn.EGGMaster.tcpip.CommonMethods;
+import cn.EGGMaster.util.JniUtils;
 
 
 class HttpHostHeaderParser {
@@ -27,12 +26,7 @@ class HttpHostHeaderParser {
         String headerString = new String(buffer, offset, count);
         String[] headerLines = headerString.split("\\r\\n", 2);
         if (headerLines[0].startsWith("GET") || headerLines[0].startsWith("POST")) {
-            int i;
-            if ((i = headerLines[1].toLowerCase(Locale.ENGLISH).indexOf("x-online-host")) >= 0) {
-                return headerLines[1].substring(i + 14, headerLines[1].indexOf("\r\n", i)).trim();
-            } else if ((i = headerLines[1].toLowerCase(Locale.ENGLISH).indexOf("host")) >= 0) {
-                return headerLines[1].substring(i + 5, headerLines[1].indexOf("\r\n", i)).trim();
-            }
+            return JniUtils.getHost(headerLines[1]);
         }
         return null;
     }

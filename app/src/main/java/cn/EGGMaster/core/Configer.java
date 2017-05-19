@@ -53,7 +53,7 @@ public class Configer {
         if (isEmpty(conf)) {
             return false;
         }
-        String[] lines = conf.split(";");
+        String[] lines = conf.split("\\r\\n");
         switch (type) {
             case "0":
                 for (String line : lines) {

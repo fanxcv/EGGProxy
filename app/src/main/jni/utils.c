@@ -22,7 +22,7 @@ char *getHost(char *str);
 
 char *strlower(char *src);
 
-char *delHeader(char *src, char *delstr);
+void delHeader(char *src, const char* _ds);
 
 int startWith(char *src, char *str);
 
@@ -313,29 +313,28 @@ int startWith(char *src, char *str) {
     return 1;
 }
 
-char *delHeader(char *src, char *delstr) {
-    char *inner_ptr, *ns = NULL;
-    if (!delstr || strcmp(src, "\n\r\n") == 0) return src;
-    char *del = strtok_r(delstr, ",", &inner_ptr);
-    if (!del || strcmp(src, "\n\r\n") == 0) return src;
-    size_t srclen = strlen(src);
-    char *find = NULL, *fork = NULL;
-    if ((find = strcasestr(src, del))) {
-        if (*(find - 1) == '\n') {
-            fork = strchr(find, '\r');
-            size_t i = srclen - (fork - find) - 2;
-            ns = malloc(i + 1);
-            if ((find - 1) == src) {
-                memcpy(ns, fork + 1, i);
-            } else {
-                memcpy(ns, src, find - 1 - src);
-                memcpy(ns + (find - 1 - src), fork + 1, i - (find - 1 - src));
-            }
-            memset(ns + i, 0, 1);
-            free(src);
-        }
-    } else {
-        ns = src;
+#define NEN(c) (c != '\0' && c != '\r' && c != '\n')
+#define INL(c) (c == '\r' || c == '\n')
+void _delHeader(char *src, const char *delstr) {
+    char *hpos = src;
+    while(*hpos != '\0'){
+        hpos =  strcasestr(hpos,delstr);
+        if(hpos<0) break;
+        char *epos = hpos;
+        while NEN(*epos)
+            epos ++;
+        while INL(*epos)
+            epos ++;
+        strcpy(hpos,epos);
     }
-    return delHeader(ns, inner_ptr);
+}
+
+void delHeader(char *src, const char* _ds) {
+    char *ds = strdup(_ds);
+    char *d = strtok(ds,",");
+    while(d!=NULL){
+        _delHeader(src,d);
+        d = strtok(NULL,",");
+    }
+    free(ds);
 }

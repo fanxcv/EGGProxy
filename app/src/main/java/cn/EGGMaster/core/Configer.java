@@ -10,10 +10,6 @@ import static android.text.TextUtils.isEmpty;
 
 public class Configer {
 
-    public static String http_del;
-    public static String http_first;
-    public static String https_first;
-
     static boolean isNet = false;
     static boolean allHttps = false;
 
@@ -44,10 +40,7 @@ public class Configer {
             return false;
         }
 
-        JniUtils.loadConf(conf, Integer.parseInt(type));
-        http_del = JniUtils.getConfString(100133);
-        http_first = JniUtils.getConfString(100131);
-        https_first = JniUtils.getConfString(100132);
+        boolean res = JniUtils.loadConf(conf, Integer.parseInt(type));
 
         isNet = JniUtils.getConfBoolean(StaticVal.ISNET);
         allHttps = JniUtils.getConfBoolean(StaticVal.ALLHTTPS);
@@ -58,52 +51,6 @@ public class Configer {
         if (!isEmpty(JniUtils.getConfString(StaticVal.HTTPS_IP))) {
             httpsAddress = new InetSocketAddress(JniUtils.getConfString(StaticVal.HTTPS_IP), Integer.parseInt(JniUtils.getConfString(StaticVal.HTTPS_PORT)));
         }
-
-//                for (String line : lines) {
-//                    line = line.trim();
-//                    if (line.contains("httpip")) {
-//                        String[] params = line.split("=", 2);
-//                        if (!"null".equals(params[1])) {
-//                            if (line.contains(":")) {
-//                                String[] param = params[1].split(":", 2);
-//                                http_ip = formatString(param[0]);
-//                                http_port = formatString(param[1]);
-//                            } else {
-//                                http_ip = formatString(params[1]);
-//                                http_port = "80";
-//                            }
-//                        } else
-//                            mode = "net";
-//                    } else if (line.contains("httpsip")) {
-//                        String[] params = line.split("=", 2);
-//                        if (!"null".equals(params[1]))
-//                            if (line.contains(":")) {
-//                                String[] param = params[1].split(":", 2);
-//                                https_ip = formatString(param[0]);
-//                                https_port = formatString(param[1]);
-//                            } else {
-//                                https_ip = formatString(params[1]);
-//                                https_port = "80";
-//                            }
-//                    } else if (line.contains("[MTD]")) {
-//                        http_first = genericFirstLine(formatString(line + "\\r\\n"));
-//                    } else if (line.contains("CONNECT")) {
-//                        https_first = genericFirstLine(formatString(line + "\\r\\n"));
-//                    }
-//                }
-//                http_dels = new String[]{"Host", "X-Online-Host"};
-        return !(isEmpty(http_first) || isEmpty(https_first));
+        return res;
     }
-
-//    @Override
-//    public String toString() {
-//        return "\r\nisNet='" + (isNet ? "true" : "false") + '\'' +
-//                "\r\nhttp_ip='" + JniUtils.getConfString(StaticVal.HTTP_IP) + '\'' +
-//                "\r\nhttp_port='" + JniUtils.getConfString(StaticVal.HTTP_PORT) + '\'' +
-//                "\r\nhttp_del=" + http_del +
-//                "\r\nhttp_first='" + http_first + '\'' +
-//                "\r\nhttps_ip='" + JniUtils.getConfString(StaticVal.HTTPS_IP) + '\'' +
-//                "\r\nhttps_port='" + JniUtils.getConfString(StaticVal.HTTPS_PORT) + '\'' +
-//                "\r\nhttps_first='" + https_first + '\'';
-//    }
 }

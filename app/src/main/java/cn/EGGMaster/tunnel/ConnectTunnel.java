@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
 import cn.EGGMaster.util.DataUtils;
+import cn.EGGMaster.util.JniUtils;
 
 public class ConnectTunnel extends Tunnel {
 
@@ -28,7 +28,13 @@ public class ConnectTunnel extends Tunnel {
             int bytesRead = m_InnerChannel.read(buffer);
             if (bytesRead > 0) {
                 buffer.flip();
-                afterReceived(buffer);//先让子类处理，例如解密数据。
+                if (!this.m_TunnelEstablished) {
+                    if (new String(buffer.array(), buffer.position(), 12).matches("^HTTP/1.[01] 200$")) {
+                        buffer.limit(buffer.position());
+                        this.m_TunnelEstablished = true;
+                        super.onTunnelEstablished();
+                    }
+                }
                 if (isTunnelEstablished() && buffer.hasRemaining()) {//将读到的数据，转发给兄弟。
                     //m_BrotherTunnel.beforeSend(buffer);//发送之前，先让子类处理，例如做加密等。
                     if (!m_BrotherTunnel.write(buffer, true)) {
@@ -46,16 +52,6 @@ public class ConnectTunnel extends Tunnel {
         }
     }
 
-    private void afterReceived(ByteBuffer byteBuffer) throws Exception {
-        if (!this.m_TunnelEstablished) {
-            if (new String(byteBuffer.array(), byteBuffer.position(), 12).matches("^HTTP/1.[01] 200$")) {
-                byteBuffer.limit(byteBuffer.position());
-                this.m_TunnelEstablished = true;
-                super.onTunnelEstablished();
-            }
-        }
-    }
-
     @Override
     protected boolean isTunnelEstablished() {
         return this.m_TunnelEstablished;
@@ -65,28 +61,19 @@ public class ConnectTunnel extends Tunnel {
     public void onConnectable() {
         try {
             if (m_InnerChannel.finishConnect()) {//连接成功
-                onConnected(DataUtils.getConnBuffer());//通知子类TCP已连接，子类可以根据协议实现握手等。
+                ByteBuffer byteBuffer = DataUtils.getConnBuffer();
+                byteBuffer.put(JniUtils.getCoonHeader(remoteHost).getBytes());
+                byteBuffer.flip();
+                if (write(byteBuffer, true)) {
+                    beginReceive();
+                }
+                DataUtils.setConnBuffer(byteBuffer);
             } else {//连接失败
                 this.dispose();
             }
         } catch (Exception e) {
             this.dispose();
         }
-    }
-
-    private void onConnected(ByteBuffer byteBuffer) throws Exception {
-        String format = Configer.https_first
-                .replaceAll("\\[V\\]", "HTTP/1.0")
-                .replaceAll("\\[M\\]", "CONNECT")
-                .replaceAll("\\[U\\]", "/")
-                .replaceAll("\\[H\\]", remoteHost + ":" + m_DestAddress.getPort())
-                + "\r\n";
-        byteBuffer.put(format.getBytes());
-        byteBuffer.flip();
-        if (write(byteBuffer, true)) {
-            beginReceive();
-        }
-        DataUtils.setConnBuffer(byteBuffer);
     }
 
 }

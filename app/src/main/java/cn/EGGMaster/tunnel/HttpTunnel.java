@@ -7,11 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.util.JniUtils;
 
 import static android.text.TextUtils.isEmpty;
@@ -19,13 +15,6 @@ import static cn.EGGMaster.util.StaticVal.METHOD_GET;
 import static cn.EGGMaster.util.StaticVal.METHOD_POST;
 
 public class HttpTunnel extends Tunnel {
-
-    private String host;
-    private String path;
-    private String method;
-    private String version;
-
-    private StringBuffer header;
 
     public HttpTunnel(InetSocketAddress serverAddress, Selector selector) throws Exception {
         super(serverAddress, selector);
@@ -81,15 +70,7 @@ public class HttpTunnel extends Tunnel {
     private ByteBuffer headerProcess(ByteBuffer buffer) {
         String request = getString(buffer);
         if (!isEmpty(request) && getMethod(request.substring(0, 10).trim())) {
-            JniUtils.headerProcess(request);
-            String[] herders = request.split("\\r\\n");
-            header = new StringBuffer();
-            addHeaderMethod(herders[0]);
-            for (int i = 1; i < herders.length; i++) {
-                addHeaderString(herders[i]);
-            }
-            buildHeader();
-            return ByteBuffer.wrap(header.toString().getBytes());
+            return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
         }
         return buffer;
     }
@@ -97,45 +78,4 @@ public class HttpTunnel extends Tunnel {
     private boolean getMethod(String str) {
         return str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST);
     }
-
-    private void addHeaderMethod(String str) {
-        if (!isEmpty(method)) {
-            Pattern p = Pattern.compile("([a-zA-Z ]*?://)?([^/]*)(.*) (HTTP/.*)$");
-            Matcher m = p.matcher(str);
-            if (m.find()) {
-                path = m.group(3).trim();
-                version = m.group(4).trim();
-            }
-        }
-    }
-
-    private void addHeaderString(String str) {
-        int i;
-        if ((i = str.indexOf(':')) >= 0) {
-            String head = str.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
-            if (host == null) {
-                int j = str.length();
-                if ("x-online-host".equals(head)) {
-                    host = str.substring(++i, j);
-                } else if ("host".equals(head)) {
-                    host = str.substring(++i, j);
-                }
-            }
-            String header = "'|" + head + "|'";
-            if (Configer.http_del.contains(header)) {
-                return;
-            }
-        }
-        header.append(str.trim()).append("\r\n");
-    }
-
-    private void buildHeader() {
-        header.insert(0, Configer.http_first
-                .replaceAll("\\[M\\]", method)
-                .replaceAll("\\[V\\]", version)
-                .replaceAll("\\[H\\]", host)
-                .replaceAll("\\[U\\]", path)
-        ).append("\r\n");
-    }
-
 }

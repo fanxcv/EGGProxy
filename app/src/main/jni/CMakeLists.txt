@@ -6,8 +6,9 @@ add_library(
     SHARED
 
     # Sources
-    Core.c
-    utils.c
+    Core.cpp
+    Utils.cpp
+    Socket.cpp
 )
 
 # add system library to build Core

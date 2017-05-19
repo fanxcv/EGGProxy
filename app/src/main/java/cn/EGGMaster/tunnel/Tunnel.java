@@ -23,12 +23,12 @@ public abstract class Tunnel {
     private boolean m_Disposed;
     private InetSocketAddress m_ServerIP;
 
-    public Tunnel(SocketChannel innerChannel, Selector selector) {
+    Tunnel(SocketChannel innerChannel, Selector selector) {
         this.m_InnerChannel = innerChannel;
         this.m_Selector = selector;
     }
 
-    public Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
+    Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
         SocketChannel innerChannel = SocketChannel.open();
         innerChannel.configureBlocking(false);
         this.m_InnerChannel = innerChannel;

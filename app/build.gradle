@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        Fan {
+            keyAlias 'Fan'
+            keyPassword 'f123456789'
+            storeFile file('G:/Android/Fan.jks')
+            storePassword 'f123456789'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
     defaultConfig {
@@ -14,17 +22,15 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags ""
-                abiFilters "armeabi-v7a","arm64-v8a","x86","mips"// 输出指定三种abi体系结构下的so库。目前可有可无。
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "mips"// 输出指定三种abi体系结构下的so库。目前可有可无。
             }
         }
     }
-
     externalNativeBuild {
         cmake {
             path "src/main/jni/CMakeLists.txt"
         }
     }
-
     buildTypes {
         release {
             // 不显示Log

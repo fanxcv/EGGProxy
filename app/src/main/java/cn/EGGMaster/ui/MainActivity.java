@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -21,12 +20,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.Map;
 
 import cn.EGGMaster.R;
@@ -44,6 +38,8 @@ import static cn.EGGMaster.util.DataUtils.gson;
 import static cn.EGGMaster.util.DataUtils.initBufferPool;
 import static cn.EGGMaster.util.DataUtils.phoneIMEI;
 import static cn.EGGMaster.util.DataUtils.user;
+import static cn.EGGMaster.util.DataUtils.versionName;
+import static cn.EGGMaster.util.InetUtils.getLocalHost;
 import static cn.EGGMaster.util.Utils.sendPost;
 
 public class MainActivity extends Activity implements
@@ -59,6 +55,7 @@ public class MainActivity extends Activity implements
     private TextView textViewLog;
     private ScrollView scrollViewLog;
     private Calendar mCalendar;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,14 +70,27 @@ public class MainActivity extends Activity implements
         textViewLog.setText(GL_HISTORY_LOGS);
         scrollViewLog.fullScroll(ScrollView.FOCUS_DOWN);
 
+        preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
+
         explain.setText(getText(R.string.explain) + StringCode.getInstance().decrypt(app.get("AppExplain")) + "");
 
-        info.setText("到期时间：" + user.get("due_time") + "\r\n剩余时间：" +
-                ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天"));
+        changeView();
 
         initBufferPool(16);
         mCalendar = Calendar.getInstance();
         LocalVpnService.addOnStatusChangedListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        changeView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        changeView();
     }
 
     @Override
@@ -143,8 +153,7 @@ public class MainActivity extends Activity implements
     private void startVPNService() {
         textViewLog.setText("");
         GL_HISTORY_LOGS = null;
-        onLogReceived(getHostIP());
-        SharedPreferences preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
+        onLogReceived("软件版本：" + versionName);
         String id = preferences.getString("lineId", null);
         if (isEmpty(id)) {
             onLogReceived("你还未选择线路，请先选择线路");
@@ -292,9 +301,9 @@ public class MainActivity extends Activity implements
                                     "id=" + admin.get("id"), "type=" + type);
                             try {
                                 Map<String, String> list = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
-                                info.setText("到期时间：" + list.get("due_time") + "\r\n剩余时间：" + list.get("time") + "天");
                                 user.put("due_time", list.get("due_time"));
                                 user.put("time", list.get("time"));
+                                changeView();
                             } catch (Exception e) {
                                 onLogReceived("充值失败");
                             }
@@ -313,37 +322,13 @@ public class MainActivity extends Activity implements
         super.onDestroy();
     }
 
-    /**
-     * 获取ip地址
-     *
-     * @return
-     */
-    public static String getHostIP() {
-
-        String hostIp = null;
-        try {
-            Enumeration nis = NetworkInterface.getNetworkInterfaces();
-            InetAddress ia = null;
-            while (nis.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) nis.nextElement();
-                Enumeration<InetAddress> ias = ni.getInetAddresses();
-                while (ias.hasMoreElements()) {
-                    ia = ias.nextElement();
-                    if (ia instanceof Inet6Address) {
-                        continue;// skip ipv6
-                    }
-                    String ip = ia.getHostAddress();
-                    if (!"127.0.0.1".equals(ip)) {
-                        hostIp = ia.getHostAddress();
-                        break;
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            Log.i("yao", "SocketException");
-            e.printStackTrace();
-        }
-        return hostIp;
+    private void changeView() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("本机地址：").append(getLocalHost()).append("\r\n")
+                .append("当前线路：").append(isEmpty(preferences.getString("lineName", null)) ? "未选择" : preferences.getString("lineName", null)).append("\r\n")
+                .append("到期时间：").append(user.get("due_time")).append("\r\n")
+                .append("剩余时间：").append("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天");
+        info.setText(sb.toString());
     }
 
 }

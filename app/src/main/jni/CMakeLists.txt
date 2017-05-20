@@ -8,7 +8,6 @@ add_library(
     # Sources
     Core.cpp
     Utils.cpp
-    Socket.cpp
 )
 
 # add system library to build Core

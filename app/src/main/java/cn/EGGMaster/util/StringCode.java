@@ -5,7 +5,7 @@ import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import static cn.EGGMaster.util.StaticVal.strDefaultKey;
+import static cn.EGGMaster.util.StaticVal.defaultkey;
 
 public class StringCode {
 
@@ -29,7 +29,7 @@ public class StringCode {
     public static synchronized StringCode getInstance() {
         try {
             if (code == null) {
-                code = new StringCode(getStr(strDefaultKey));
+                code = new StringCode(getStr(defaultkey));
             }
         } catch (Exception e) {
             e.printStackTrace();

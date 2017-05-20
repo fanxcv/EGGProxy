@@ -62,6 +62,7 @@ public class ListActivity extends Activity implements OnItemClickListener {
         SharedPreferences preferences = getSharedPreferences("EggInfo", MODE_PRIVATE);
         Editor editor = preferences.edit();
         editor.putString("lineId", lineId.getText().toString());
+        editor.putString("lineName", lineName.getText().toString());
         editor.apply();
         Toast.makeText(this, "已选择：" + lineName.getText().toString(), Toast.LENGTH_SHORT).show();
     }

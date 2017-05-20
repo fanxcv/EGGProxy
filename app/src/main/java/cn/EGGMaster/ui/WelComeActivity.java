@@ -11,8 +11,9 @@ import android.widget.Toast;
 import cn.EGGMaster.R;
 import cn.EGGMaster.core.LocalVpnService;
 import cn.EGGMaster.util.DataUtils;
-
-import static cn.EGGMaster.util.Utils.sendPost;
+import cn.EGGMaster.util.JniUtils;
+import cn.EGGMaster.util.StaticVal;
+import cn.EGGMaster.util.Utils;
 
 public class WelComeActivity extends Activity {
 
@@ -30,6 +31,11 @@ public class WelComeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
 
+        if (TextUtils.isEmpty(StaticVal.defaultkey))
+            StaticVal.defaultkey = JniUtils.getConfString(StaticVal.KEY);
+        if (TextUtils.isEmpty(StaticVal.defaulturl))
+            StaticVal.defaulturl = JniUtils.getConfString(StaticVal.URL);
+
         if (DataUtils.APP_KEY == null)
             DataUtils.APP_KEY = getString(R.string.key);
         if (!DataUtils.initLocalData(this)) {
@@ -39,25 +45,23 @@ public class WelComeActivity extends Activity {
         if (LocalVpnService.IsRunning)
             start();
 
-        if (TextUtils.isEmpty(DataUtils.webVersion))
-            DataUtils.webVersion = sendPost("getVersion", "version=" + DataUtils.versionName);
-        if ("0".equals(DataUtils.webVersion)) {
+        DataUtils.webVersion = JniUtils.initCore(Utils.Instance, this);
+        if (TextUtils.isEmpty(DataUtils.webVersion) && "0".equals(DataUtils.webVersion)) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")
                     .setMessage("当前版本需要更新，请联系应用提供商更新！")
                     .setPositiveButton(R.string.btn_ok, null)
                     .show();
         } else if ("1".equals(DataUtils.webVersion)) {
-            getInfo();
+            DataUtils.initWebData();
+            start();
+        } else if ("-1".equals(DataUtils.webVersion)) {
+            Toast.makeText(this, "请勿修改软件！", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "网络错误！", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void getInfo() {
-        DataUtils.initWebData();
-        start();
-    }
 
     private void start() {
         Intent intent = new Intent();

@@ -4,6 +4,10 @@
 #include <android/log.h>
 /* Header for class cn_EGGMaster_util_JniUtils */
 
+#undef KEY
+#define KEY 100001
+#undef URL
+#define URL 100002
 #undef ISNET
 #define ISNET 100101
 #undef ALLHTTPS
@@ -16,6 +20,14 @@
 #define HTTPS_IP 100121
 #undef HTTPS_PORT
 #define HTTPS_PORT 100122
+
+#undef VERSION
+#define VERSION "1.4"
+
+#undef DEFAULTKEY
+#define DEFAULTKEY "66676863776e765274717a7b4d677b"
+#undef DEFAULTURL
+#define DEFAULTURL "6a7676723c313178306769697b77703065703147494943726b31"
 
 #define LOG_TAG "ndk-test"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)

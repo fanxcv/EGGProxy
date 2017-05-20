@@ -11,7 +11,13 @@ import java.net.URL;
  */
 
 public class Utils {
-    private static final String INDEX = StringCode.getStr(StaticVal.INDEX);
+    private static final String INDEX = StringCode.getStr(StaticVal.defaulturl);
+
+    public static final Utils Instance = new Utils();
+
+    private String sendPosts(String url, String param) {
+        return sendPost(url, param);
+    }
 
     /**
      * POST请求数据

@@ -69,13 +69,11 @@ public class HttpTunnel extends Tunnel {
 
     private ByteBuffer headerProcess(ByteBuffer buffer) {
         String request = getString(buffer);
-        if (!isEmpty(request) && getMethod(request.substring(0, 10).trim())) {
-            return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
+        if (!isEmpty(request)) {
+            String str = request.substring(0, 10).trim();
+            if (str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST))
+                return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
         }
         return buffer;
-    }
-
-    private boolean getMethod(String str) {
-        return str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST);
     }
 }

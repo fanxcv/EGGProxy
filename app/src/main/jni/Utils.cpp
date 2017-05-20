@@ -156,6 +156,7 @@ void resFstLine(string &url, string &version) {
     trim(url);
     const char *p = url.c_str();
     size_t len = url.length(), pos = url.find(' ');
+    if (pos == string::npos) return;
     version = url.substr(pos + 1, len - pos - 1);
     url.erase(pos);
     if (!startWith(url.c_str(), "/")) {
@@ -190,7 +191,7 @@ void _delHeader(string &src, string const &delstr) {
 void delHeader(string &src, string const &_ds) {
     if (src.empty() || _ds.empty()) return;
     size_t start = 0, pos = 0, len = _ds.length();
-    while ((pos = _ds.find(',', pos + 1)) < len) {
+    while ((pos = _ds.find(',', pos + 1)) != string::npos) {
         _delHeader(src, _ds.substr(start, pos));
         start = pos + 1;
     }

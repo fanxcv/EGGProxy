@@ -42,9 +42,9 @@ public class DataUtils extends Utils {
 
     public static String APP_KEY = null;
 
-    public static String appInstallID = null;
+    private static String appInstallID = null;
+    private static String phoneNumber = null;
     public static String versionName = null;
-    public static String phoneNumber = null;
     public static String phoneIMEI = null;
 
     public static void initBufferPool(int num) {

@@ -14,6 +14,7 @@ extern void resFstLine(string &url, string &version);
 
 extern void replaceAll(string &src, string const &find, string const &replace);
 
+int init = 0;
 int _is_net, _all_https;
 string _mode, _del_h;
 string _port_h, _port_s;
@@ -24,6 +25,7 @@ extern "C" {
 
 JNIEXPORT jboolean JNICALL
 Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *env, jobject obj, jstring conf, jint type) {
+    if (!init) return 0;
 
     const char *cConf = env->GetStringUTFChars(conf, NULL);
 
@@ -57,6 +59,10 @@ JNIEXPORT jstring JNICALL
 Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint type) {
 
     switch (type) {
+        case KEY:
+            return env->NewStringUTF(DEFAULTKEY);
+        case URL:
+            return env->NewStringUTF(DEFAULTURL);
         case HTTP_IP:
             return env->NewStringUTF(_host_h.c_str());
         case HTTP_PORT:
@@ -74,6 +80,7 @@ Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint typ
 
 JNIEXPORT jboolean JNICALL
 Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *env, jobject obj, jint type) {
+    if (!init) return 1;
 
     switch (type) {
         case ISNET:
@@ -122,18 +129,28 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     string method, host, url, version, cHeader = tHeader, ns = _first_h;
 
     size_t n_a = cHeader.find("\r\n");
-    if (n_a < cHeader.length()) {
+    if (n_a != string::npos) {
         url = cHeader.substr(0, n_a);
+        cHeader.erase(0, n_a + 2);
+        host = getHost(cHeader);
+
         if (startWith(url.c_str(), "GET")) {
             method = "GET";
+            delHeader(cHeader, _del_h);
             resFstLine(url.erase(0, 4), version);
         } else if (startWith(url.c_str(), "POST")) {
             method = "POST";
             resFstLine(url.erase(0, 5), version);
+
+            size_t pos = cHeader.find("\r\n\r\n");
+            if (pos != string::npos) {
+                string tmp = cHeader.substr(pos + 4, cHeader.length() - pos - 4);
+                delHeader(cHeader.erase(pos + 4), _del_h);
+                cHeader += tmp;
+            } else {
+                delHeader(cHeader, _del_h);
+            }
         }
-        cHeader.erase(0, n_a + 2);
-        host = getHost(cHeader);
-        delHeader(cHeader, _del_h);
     }
     replaceAll(ns, "[M]", method);
     replaceAll(ns, "[H]", host);
@@ -143,5 +160,49 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);
     return newReq;
+}
+
+JNIEXPORT jstring JNICALL
+Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject utils, jobject context) {
+
+    jclass m_Context = env->GetObjectClass(context);
+    jmethodID getPackageName = env->GetMethodID(m_Context, "getPackageName",
+                                                "()Ljava/lang/String;");
+    jmethodID getPackageManager = env->GetMethodID(m_Context, "getPackageManager",
+                                                   "()Landroid/content/pm/PackageManager;");
+    jobject o_getPackageManager = env->CallObjectMethod(context, getPackageManager);
+    jclass m_getPackageManager = env->GetObjectClass(o_getPackageManager);
+
+    jmethodID getPackageInfo = env->GetMethodID(m_getPackageManager, "getPackageInfo",
+                                                "(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;");
+    jstring packageName = (jstring) (env->CallObjectMethod(context, getPackageName));
+
+    jobject o_package = env->CallObjectMethod(o_getPackageManager, getPackageInfo, packageName, 0);
+    jclass m_package = env->GetObjectClass(o_package);
+
+    jfieldID i_version = env->GetFieldID(m_package, "versionName", "Ljava/lang/String;");
+    jstring version = (jstring) env->GetObjectField(o_package, i_version);
+
+    const char *tversion = env->GetStringUTFChars(version, NULL);
+    if (strcmp(tversion, VERSION) != 0) {
+        env->ReleaseStringUTFChars(version, tversion);
+        return env->NewStringUTF("-1");
+    }
+    string cversion = tversion;
+    cversion = "version=" + cversion;
+    jstring jversion = env->NewStringUTF(cversion.c_str());
+    jstring urlPath = env->NewStringUTF("getVersion");
+
+    jclass m_utils = env->GetObjectClass(utils);
+    jmethodID sendPost = env->GetMethodID(m_utils, "sendPosts",
+                                          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jstring result = (jstring) env->CallObjectMethod(utils, sendPost, urlPath, jversion);
+
+    const char *tresult = env->GetStringUTFChars(result, NULL);
+    if (*tresult) init = 1;
+    env->ReleaseStringUTFChars(result, tresult);
+    env->ReleaseStringUTFChars(version, tversion);
+
+    return result;
 }
 }

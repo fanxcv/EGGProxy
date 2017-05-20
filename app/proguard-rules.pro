@@ -41,7 +41,7 @@
 #-dontskipnonpubliclibraryclassmembers
 
 # 不做预校验，preverify是proguard的四个步骤之一，Android不需要preverify，去掉这一步能够加快混淆速度。
-#-dontpreverify
+-dontpreverify
 
 # 抛出异常时保留代码行号
 #-keepattributes SourceFile,LineNumberTable
@@ -49,3 +49,12 @@
 # 指定混淆是采用的算法，后面的参数是一个过滤器
 # 这个过滤器是谷歌推荐的算法，一般不做更改
 #-optimizations !code/simplification/cast,!field/*,!class/merging/*
+
+# 排除native方法
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keep class cn.EGGMaster.util.Utils {
+    private java.lang.String sendPosts(java.lang.String, java.lang.String);
+}

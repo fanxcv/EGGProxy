@@ -47,12 +47,12 @@ public class Configer {
 
         String http_ip = JniUtils.getConfString(StaticVal.HTTP_IP);
         String https_ip = JniUtils.getConfString(StaticVal.HTTPS_IP);
-        String http_port = JniUtils.getConfString(StaticVal.HTTP_PORT);
-        String https_port = JniUtils.getConfString(StaticVal.HTTPS_PORT);
         if (!isEmpty(http_ip)) {
+            String http_port = JniUtils.getConfString(StaticVal.HTTP_PORT);
             httpAddress = new InetSocketAddress(http_ip, Integer.parseInt(http_port));
         }
         if (!isEmpty(https_ip)) {
+            String https_port = JniUtils.getConfString(StaticVal.HTTPS_PORT);
             httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
         return res;

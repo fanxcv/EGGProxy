@@ -126,7 +126,7 @@ public class StringCode {
         return arrOut;
     }
 
-    public static String getStr(String hex) {
+    static String getStr(String hex) {
         try {
             return new String(strToByte(hex), "utf-8");
         } catch (Exception e) {

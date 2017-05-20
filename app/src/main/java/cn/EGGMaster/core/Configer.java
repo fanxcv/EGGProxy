@@ -18,8 +18,8 @@ public class Configer {
 
     public static final Configer instance = new Configer();
 
-    private final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
     final static int FAKE_NETWORK_IP = CommonMethods.ipStringToInt("26.25.0.0");
+    private final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
 
     private Configer() {
     }
@@ -45,11 +45,15 @@ public class Configer {
         isNet = JniUtils.getConfBoolean(StaticVal.ISNET);
         allHttps = JniUtils.getConfBoolean(StaticVal.ALLHTTPS);
 
-        if (!isEmpty(JniUtils.getConfString(StaticVal.HTTP_IP))) {
-            httpAddress = new InetSocketAddress(JniUtils.getConfString(StaticVal.HTTP_IP), Integer.parseInt(JniUtils.getConfString(StaticVal.HTTP_PORT)));
+        String http_ip = JniUtils.getConfString(StaticVal.HTTP_IP);
+        String https_ip = JniUtils.getConfString(StaticVal.HTTPS_IP);
+        String http_port = JniUtils.getConfString(StaticVal.HTTP_PORT);
+        String https_port = JniUtils.getConfString(StaticVal.HTTPS_PORT);
+        if (!isEmpty(http_ip)) {
+            httpAddress = new InetSocketAddress(http_ip, Integer.parseInt(http_port));
         }
-        if (!isEmpty(JniUtils.getConfString(StaticVal.HTTPS_IP))) {
-            httpsAddress = new InetSocketAddress(JniUtils.getConfString(StaticVal.HTTPS_IP), Integer.parseInt(JniUtils.getConfString(StaticVal.HTTPS_PORT)));
+        if (!isEmpty(https_ip)) {
+            httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
         return res;
     }

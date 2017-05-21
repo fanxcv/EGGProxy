@@ -115,10 +115,19 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring host) {
+Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring host, jstring port) {
+
     const char *tHost = env->GetStringUTFChars(host, NULL);
 
+    string hosts = tHost;
     string ns = _first_s + "\r\n";
+
+    if (hosts.find(':') == string::npos) {
+        const char *tPort = env->GetStringUTFChars(port, NULL);
+        hosts += ':';
+        hosts += tPort;
+        env->ReleaseStringUTFChars(port, tPort);
+    }
 
     if (_key_s) {
         time_t t_time;
@@ -130,10 +139,9 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
         stream >> s_time;
         s_time += "000";
         string urls = "https://";
-        string hosts = tHost;
-        if (endWith(tHost, ":443"))
+        if (endWith(hosts.c_str(), ":443"))
             urls += hosts.substr(0, hosts.length() - 4) + "/";
-        else if (endWith(tHost, ":80"))
+        else if (endWith(hosts.c_str(), ":80"))
             urls += hosts.substr(0, hosts.length() - 3) + "/";
         else
             urls += hosts + "/";
@@ -155,7 +163,7 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
     }
 
     replaceAll(ns, "[U]", "/");
-    replaceAll(ns, "[H]", tHost);
+    replaceAll(ns, "[H]", hosts);
     replaceAll(ns, "[M]", "CONNECT");
     replaceAll(ns, "[V]", "HTTP/1.1");
 

@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static cn.wostore.auth.WoJNIUtil.getD;
+import cn.wostore.auth.WoJNIUtil;
 
 /**
  * Created by Fan on 2017/4/4.
@@ -18,11 +18,10 @@ public class Utils {
     private static final String INDEX = StringCode.secrypt(StaticVal.defaulturl);
 
     private static String getKey(String url, String time) {
-        //String url = "http://" + host + path;
         Uri parse = Uri.parse(url);
         String host = parse.getHost();
-        String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
-        return getD("13072257727", url, "00000000000/1", time, host, port);
+        String valueOf = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
+        return WoJNIUtil.a(host, valueOf, url, "13072257727", "00000000000/1", time).toLowerCase();
     }
 
     private static String sendPosts(String url, String param) {

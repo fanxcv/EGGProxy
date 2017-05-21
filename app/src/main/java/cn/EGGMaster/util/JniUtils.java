@@ -22,7 +22,7 @@ public class JniUtils {
 
     public static native String getHttpHeader(String header);
 
-    public static native String getCoonHeader(String host);
+    public static native String getCoonHeader(String host, String port);
 
     public static native String initCore(Context context);
 

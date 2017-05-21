@@ -7,6 +7,8 @@ extern void loadConfTiny(const char *conf);
 
 extern string getHost(string &src);
 
+extern int endWith(const char *src, const char *str);
+
 extern int startWith(const char *src, const char *str);
 
 extern void delHeader(string &src, string const &_ds);
@@ -128,8 +130,14 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
         stream >> s_time;
         s_time += "000";
         string urls = "https://";
-        urls += tHost;
-        urls += "/";
+        string hosts = tHost;
+        if (endWith(tHost, ":443"))
+            urls += hosts.substr(0, hosts.length() - 4) + "/";
+        else if (endWith(tHost, ":80"))
+            urls += hosts.substr(0, hosts.length() - 3) + "/";
+        else
+            urls += hosts + "/";
+        LOGI("CONNECT请求 : %s", urls.c_str());
 
         jstring param = env->NewStringUTF(urls.c_str());
         jstring paramx = env->NewStringUTF(s_time.c_str());
@@ -151,7 +159,7 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
     replaceAll(ns, "[M]", "CONNECT");
     replaceAll(ns, "[V]", "HTTP/1.1");
 
-    LOGI("CONNECT请求 : %s", ns.c_str());
+    //LOGI("CONNECT请求 : %s", ns.c_str());
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(host, tHost);
     return newReq;
@@ -199,7 +207,13 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
         stream >> s_time;
         s_time += "000";
         string urls = "http://";
-        urls += host + url;
+        if (endWith(host.c_str(), ":80"))
+            urls += host.substr(0, host.length() - 3) + url;
+        else if (endWith(host.c_str(), ":443"))
+            urls += host.substr(0, host.length() - 4) + url;
+        else
+            urls += host + url;
+        LOGI("HTTP请求 : %s", urls.c_str());
 
         jstring param = env->NewStringUTF(urls.c_str());
         jstring paramx = env->NewStringUTF(s_time.c_str());
@@ -221,7 +235,7 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     replaceAll(ns, "[V]", version);
     replaceAll(ns, "[U]", url);
     ns += cHeader;
-    LOGI("HTTP请求 : %s", ns.c_str());
+    //LOGI("HTTP请求 : %s", ns.c_str());
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);
     return newReq;

@@ -21,6 +21,8 @@ string getHost(string &src);
 
 void delHeader(string &src, string const &_ds);
 
+int endWith(const char *src, const char *str);
+
 int startWith(const char *src, const char *str);
 
 void resFstLine(string &url, string &version);
@@ -168,6 +170,12 @@ void resFstLine(string &url, string &version) {
 int startWith(const char *src, const char *str) {
     for (; *src != '\0' && *str != '\0'; src++, str++)
         if (*src != *str) return 0;
+    return 1;
+}
+
+int endWith(const char *src, const char *str) {
+    for (const char *q = src + strlen(src) - 1, *p = str + strlen(str) - 1; q != src-1 && p != str-1; q--, p--)
+        if (*q != *p) return 0;
     return 1;
 }
 

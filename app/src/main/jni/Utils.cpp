@@ -192,7 +192,7 @@ void delHeader(string &src, string const &_ds) {
     if (src.empty() || _ds.empty()) return;
     size_t start = 0, pos = 0, len = _ds.length();
     while ((pos = _ds.find(',', pos + 1)) != string::npos) {
-        _delHeader(src, _ds.substr(start, pos));
+        _delHeader(src, _ds.substr(start, pos - start));
         start = pos + 1;
     }
     _delHeader(src, _ds.substr(start, len));

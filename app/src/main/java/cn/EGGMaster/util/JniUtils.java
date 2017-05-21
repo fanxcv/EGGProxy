@@ -24,6 +24,6 @@ public class JniUtils {
 
     public static native String getCoonHeader(String host);
 
-    public static native String initCore(Utils utils, Context context);
+    public static native String initCore(Context context);
 
 }

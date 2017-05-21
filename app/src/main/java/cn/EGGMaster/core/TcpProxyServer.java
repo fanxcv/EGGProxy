@@ -8,7 +8,14 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
+import cn.EGGMaster.tunnel.ConnectTunnel;
+import cn.EGGMaster.tunnel.HttpTunnel;
 import cn.EGGMaster.tunnel.Tunnel;
+
+import static cn.EGGMaster.core.Configer.allHttps;
+import static cn.EGGMaster.core.Configer.httpAddress;
+import static cn.EGGMaster.core.Configer.httpsAddress;
+import static cn.EGGMaster.core.Configer.isNet;
 
 
 class TcpProxyServer implements Runnable {
@@ -108,12 +115,19 @@ class TcpProxyServer implements Runnable {
         Tunnel localTunnel = null;
         try {
             SocketChannel localChannel = m_ServerSocketChannel.accept();
-            localTunnel = TunnelFactory.wrap(localChannel, m_Selector);
+            localTunnel = new Tunnel(localChannel, m_Selector);
 
             NatSession session = getNatSession(localChannel);
             InetSocketAddress destAddress = getDestAddress(session, localChannel);
             if (destAddress != null) {
-                Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, m_Selector, session.RemoteHost, destAddress.getPort() != 80);
+                Tunnel remoteTunnel;
+                if (session.isSSL || allHttps) {
+                    remoteTunnel = new ConnectTunnel(httpsAddress, m_Selector, session.RemoteHost);
+                } else if (isNet) {
+                    remoteTunnel = new HttpTunnel(destAddress, m_Selector);
+                } else {
+                    remoteTunnel = new HttpTunnel(httpAddress, m_Selector);
+                }
                 remoteTunnel.setBrotherTunnel(localTunnel);
                 localTunnel.setBrotherTunnel(remoteTunnel);
                 remoteTunnel.connect(destAddress);

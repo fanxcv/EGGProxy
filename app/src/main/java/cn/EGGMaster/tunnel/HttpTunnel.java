@@ -48,31 +48,21 @@ public class HttpTunnel extends Tunnel {
         }
     }
 
-    @Override
-    protected boolean isTunnelEstablished() {
-        return true;
-    }
-
-    private String getString(ByteBuffer buffer) {
-        Charset charset;
-        CharBuffer charBuffer;
-        CharsetDecoder decoder;
-        try {
-            charset = Charset.forName("UTF-8");
-            decoder = charset.newDecoder();
-            charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
-            return charBuffer.toString();
-        } catch (Exception ex) {
-            return "";
-        }
-    }
-
     private ByteBuffer headerProcess(ByteBuffer buffer) {
-        String request = getString(buffer);
-        if (!isEmpty(request)) {
-            String str = request.substring(0, 10).trim();
-            if (str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST))
-                return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
+        String request;
+        try {
+            Charset charset = Charset.forName("UTF-8");
+            CharsetDecoder decoder = charset.newDecoder();
+            CharBuffer charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
+            request = charBuffer.toString();
+            System.out.println("这是http里的请求：" + request);
+            if (!isEmpty(request)) {
+                String str = request.substring(0, 10).trim();
+                if (str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST))
+                    return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
+            }
+        } catch (Exception ex) {
+            return buffer;
         }
         return buffer;
     }

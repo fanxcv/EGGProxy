@@ -6,20 +6,23 @@ import cn.EGGMaster.util.JniUtils;
 
 class HttpHostHeaderParser {
 
-    static String parseHost(byte[] buffer, int offset, int count) {
+    static void parseHost(byte[] buffer, int offset, int count, NatSession session) {
         try {
             switch (buffer[offset]) {
                 case 'C'://CONNECT
                 case 'G'://GET
                 case 'P'://POST,PUT
-                    return getHttpHost(buffer, offset, count);
+                    session.RemoteHost = getHttpHost(buffer, offset, count);
+                    session.isSSL = false;
+                    break;
                 case 0x16://SSL
-                    return getSNI(buffer, offset, count);
+                    session.RemoteHost = getSNI(buffer, offset, count);
+                    session.isSSL = true;
+                    break;
             }
         } catch (Exception e) {
             //
         }
-        return null;
     }
 
     private static String getHttpHost(byte[] buffer, int offset, int count) {

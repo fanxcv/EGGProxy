@@ -10,9 +10,7 @@ import java.nio.channels.SocketChannel;
 import cn.EGGMaster.core.LocalVpnService;
 import cn.EGGMaster.util.DataUtils;
 
-public abstract class Tunnel {
-
-    protected abstract boolean isTunnelEstablished();
+public class Tunnel {
 
     Selector m_Selector;
     Tunnel m_BrotherTunnel;
@@ -23,7 +21,7 @@ public abstract class Tunnel {
     private boolean m_Disposed;
     private InetSocketAddress m_ServerIP;
 
-    Tunnel(SocketChannel innerChannel, Selector selector) {
+    public Tunnel(SocketChannel innerChannel, Selector selector) {
         this.m_InnerChannel = innerChannel;
         this.m_Selector = selector;
     }
@@ -38,6 +36,10 @@ public abstract class Tunnel {
 
     public void setBrotherTunnel(Tunnel brotherTunnel) {
         m_BrotherTunnel = brotherTunnel;
+    }
+
+    protected boolean isTunnelEstablished() {
+        return true;
     }
 
     public void connect(InetSocketAddress destAddress) throws Exception {

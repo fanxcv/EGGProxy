@@ -207,10 +207,8 @@ public class LocalVpnService extends VpnService implements Runnable {
 
                         if (session.BytesSent == 0 && tcpDataSize > 10) {
                             int dataOffset = tcpHeader.m_Offset + tcpHeader.getHeaderLength();
-                            String host = HttpHostHeaderParser.parseHost(tcpHeader.m_Data, dataOffset, tcpDataSize);
-                            if (host != null) {
-                                session.RemoteHost = host;
-                            }
+                            //获取host并判断是否为https请求
+                            HttpHostHeaderParser.parseHost(tcpHeader.m_Data, dataOffset, tcpDataSize, session);
                         }
 
                         ipHeader.setSourceIP(ipHeader.getDestinationIP());

@@ -1,21 +1,31 @@
 package cn.EGGMaster.util;
 
+import android.net.Uri;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static cn.wostore.auth.WoJNIUtil.getD;
+
 /**
  * Created by Fan on 2017/4/4.
  */
 
 public class Utils {
-    private static final String INDEX = StringCode.getStr(StaticVal.defaulturl);
+    private static final String INDEX = StringCode.secrypt(StaticVal.defaulturl);
 
-    public static final Utils Instance = new Utils();
+    private static String getKey(String url, String time) {
+        //String url = "http://" + host + path;
+        Uri parse = Uri.parse(url);
+        String host = parse.getHost();
+        String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
+        return getD("13072257727", url, "00000000000/1", time, host, port);
+    }
 
-    private String sendPosts(String url, String param) {
+    private static String sendPosts(String url, String param) {
         return sendPost(url, param);
     }
 

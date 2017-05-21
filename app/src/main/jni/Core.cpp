@@ -1,4 +1,5 @@
 #include "Core.h"
+#include <sstream>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ string _mode, _del_h;
 string _port_h, _port_s;
 string _host_h, _host_s;
 string _first_h, _first_s;
+int _key_h = 0, _key_s = 0;
 
 extern "C" {
 
@@ -47,6 +49,11 @@ Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *env, jobject obj, jstring conf,
     } else if (_mode.find("wap_https") == 0) {
         _all_https = 1;
     }
+
+    if (_first_h.find("[K]") != string::npos)
+        _key_h = 1;
+    if (_first_s.find("[K]") != string::npos)
+        _key_s = 1;
 
     if (_first_h.length() > 1 && _first_s.length() > 1)
         return 1;
@@ -111,11 +118,40 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
 
     string ns = _first_s + "\r\n";
 
+    if (_key_s) {
+        long l_time;
+        string s_time;
+        stringstream stream;
+
+        time(&l_time);
+        l_time = l_time / 1000 * 1000;
+        stream << l_time;
+        stream >> s_time;
+        string urls = "https://";
+        urls += tHost;
+        urls += "/";
+
+        jstring param = env->NewStringUTF(urls.c_str());
+        jstring paramx = env->NewStringUTF(s_time.c_str());
+
+        jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
+        jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
+                                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, param, paramx);
+        const char *c_result = env->GetStringUTFChars(result, NULL);
+
+        replaceAll(ns, "[T]", s_time);
+        replaceAll(ns, "[K]", c_result);
+
+        env->ReleaseStringUTFChars(result, c_result);
+    }
+
     replaceAll(ns, "[U]", "/");
     replaceAll(ns, "[H]", tHost);
     replaceAll(ns, "[M]", "CONNECT");
     replaceAll(ns, "[V]", "HTTP/1.1");
 
+    LOGI("CONNECT请求 : %s", ns.c_str());
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(host, tHost);
     return newReq;
@@ -152,18 +188,47 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
             }
         }
     }
+
+    if (_key_h) {
+        long l_time;
+        string s_time;
+        stringstream stream;
+
+        time(&l_time);
+        l_time = l_time / 1000 * 1000;
+        stream << l_time;
+        stream >> s_time;
+        string urls = "http://";
+        urls += host + url;
+
+        jstring param = env->NewStringUTF(urls.c_str());
+        jstring paramx = env->NewStringUTF(s_time.c_str());
+
+        jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
+        jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
+                                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, param, paramx);
+        const char *c_result = env->GetStringUTFChars(result, NULL);
+
+        replaceAll(ns, "[T]", s_time);
+        replaceAll(ns, "[K]", c_result);
+
+        env->ReleaseStringUTFChars(result, c_result);
+    }
+
     replaceAll(ns, "[M]", method);
     replaceAll(ns, "[H]", host);
     replaceAll(ns, "[V]", version);
     replaceAll(ns, "[U]", url);
     ns += cHeader;
+    LOGI("HTTP请求 : %s", ns.c_str());
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);
     return newReq;
 }
 
 JNIEXPORT jstring JNICALL
-Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject utils, jobject context) {
+Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject context) {
 
     jclass m_Context = env->GetObjectClass(context);
     jmethodID getPackageName = env->GetMethodID(m_Context, "getPackageName",
@@ -193,10 +258,10 @@ Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject utils
     jstring jversion = env->NewStringUTF(cversion.c_str());
     jstring urlPath = env->NewStringUTF("getVersion");
 
-    jclass m_utils = env->GetObjectClass(utils);
-    jmethodID sendPost = env->GetMethodID(m_utils, "sendPosts",
-                                          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-    jstring result = (jstring) env->CallObjectMethod(utils, sendPost, urlPath, jversion);
+    jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
+    jmethodID sendPost = env->GetStaticMethodID(c_utils, "sendPosts",
+                                                "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jstring result = (jstring) env->CallStaticObjectMethod(c_utils, sendPost, urlPath, jversion);
 
     const char *tresult = env->GetStringUTFChars(result, NULL);
     if (*tresult) init = 1;

@@ -13,7 +13,6 @@ import cn.EGGMaster.core.LocalVpnService;
 import cn.EGGMaster.util.DataUtils;
 import cn.EGGMaster.util.JniUtils;
 import cn.EGGMaster.util.StaticVal;
-import cn.EGGMaster.util.Utils;
 
 public class WelComeActivity extends Activity {
 
@@ -45,7 +44,7 @@ public class WelComeActivity extends Activity {
         if (LocalVpnService.IsRunning)
             start();
 
-        DataUtils.webVersion = JniUtils.initCore(Utils.Instance, this);
+        DataUtils.webVersion = JniUtils.initCore(this);
         if (TextUtils.isEmpty(DataUtils.webVersion) && "0".equals(DataUtils.webVersion)) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")

@@ -119,14 +119,14 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
     string ns = _first_s + "\r\n";
 
     if (_key_s) {
-        long l_time;
+        time_t t_time;
         string s_time;
         stringstream stream;
 
-        time(&l_time);
-        l_time = l_time / 1000 * 1000;
-        stream << l_time;
+        time(&t_time);
+        stream << t_time;
         stream >> s_time;
+        s_time += "000";
         string urls = "https://";
         urls += tHost;
         urls += "/";
@@ -190,14 +190,14 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     }
 
     if (_key_h) {
-        long l_time;
+        time_t t_time;
         string s_time;
         stringstream stream;
 
-        time(&l_time);
-        l_time = l_time / 1000 * 1000;
-        stream << l_time;
+        time(&t_time);
+        stream << t_time;
         stream >> s_time;
+        s_time += "000";
         string urls = "http://";
         urls += host + url;
 

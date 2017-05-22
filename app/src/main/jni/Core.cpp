@@ -145,14 +145,28 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
         else
             urls += hosts + "/";
         //LOGI("CONNECT请求 : %s", urls.c_str());
+        string dhost = hosts, dport = "";
+        size_t find = hosts.find(':');
+        if (find != string::npos) {
+            dhost = hosts.substr(0, find);
+            dport = hosts.substr(find + 1);
+            if (dport.compare("80") == 0) {
+                dport = "";
+            }
+        }
 
-        jstring param = env->NewStringUTF(urls.c_str());
-        jstring paramx = env->NewStringUTF(s_time.c_str());
+        jstring a = env->NewStringUTF("13072257727");
+        jstring b = env->NewStringUTF(urls.c_str());
+        jstring c = env->NewStringUTF("00000000000/1");
+        jstring d = env->NewStringUTF(s_time.c_str());
+        jstring e = env->NewStringUTF(dhost.c_str());
+        jstring f = env->NewStringUTF(dport.c_str());
+
 
         jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
         jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
-                                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, param, paramx);
+                                                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
         const char *c_result = env->GetStringUTFChars(result, NULL);
 
         replaceAll(ns, "[T]", s_time);

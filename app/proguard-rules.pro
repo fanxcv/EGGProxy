@@ -56,6 +56,6 @@
 }
 
 -keep class cn.EGGMaster.util.Utils {
-    private static java.lang.String getKey(java.lang.String, java.lang.String);
     private static java.lang.String sendPosts(java.lang.String, java.lang.String);
+    private static java.lang.String getKey(java.lang.String, java.lang.String,java.lang.String, java.lang.String,java.lang.String, java.lang.String);
 }

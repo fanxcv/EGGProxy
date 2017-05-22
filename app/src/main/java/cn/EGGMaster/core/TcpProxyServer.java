@@ -121,7 +121,7 @@ class TcpProxyServer implements Runnable {
             InetSocketAddress destAddress = getDestAddress(session, localChannel);
             if (destAddress != null) {
                 Tunnel remoteTunnel;
-                if (session.isSSL || allHttps) {
+                if (destAddress.getPort() != 80 || allHttps) {
                     remoteTunnel = new ConnectTunnel(httpsAddress, m_Selector, session.RemoteHost);
                 } else if (isNet) {
                     remoteTunnel = new HttpTunnel(destAddress, m_Selector);

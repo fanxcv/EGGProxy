@@ -92,12 +92,12 @@ Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *env, jobject obj, jint ty
     if (!init) return 1;
 
     switch (type) {
+        case 0001:
+            return (jboolean) _key_s;
         case ISNET:
-            return (jboolean)
-                    _is_net;
+            return (jboolean) _is_net;
         case ALLHTTPS:
-            return (jboolean)
-                    _all_https;
+            return (jboolean) _all_https;
         default:
             break;
     }
@@ -115,7 +115,8 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring host, jstring port) {
+Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring host,
+                                              jstring port) {
 
     const char *tHost = env->GetStringUTFChars(host, NULL);
 
@@ -141,11 +142,9 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
         string urls = "https://";
         if (endWith(hosts.c_str(), ":443"))
             urls += hosts.substr(0, hosts.length() - 4) + "/";
-        else if (endWith(hosts.c_str(), ":80"))
-            urls += hosts.substr(0, hosts.length() - 3) + "/";
         else
             urls += hosts + "/";
-        LOGI("CONNECT请求 : %s", urls.c_str());
+        //LOGI("CONNECT请求 : %s", urls.c_str());
 
         jstring param = env->NewStringUTF(urls.c_str());
         jstring paramx = env->NewStringUTF(s_time.c_str());
@@ -217,11 +216,9 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
         string urls = "http://";
         if (endWith(host.c_str(), ":80"))
             urls += host.substr(0, host.length() - 3) + url;
-        else if (endWith(host.c_str(), ":443"))
-            urls += host.substr(0, host.length() - 4) + url;
         else
             urls += host + url;
-        LOGI("HTTP请求 : %s", urls.c_str());
+        //LOGI("HTTP请求 : %s", urls.c_str());
 
         jstring param = env->NewStringUTF(urls.c_str());
         jstring paramx = env->NewStringUTF(s_time.c_str());

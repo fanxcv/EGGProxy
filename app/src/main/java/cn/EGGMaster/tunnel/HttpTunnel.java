@@ -55,7 +55,6 @@ public class HttpTunnel extends Tunnel {
             CharsetDecoder decoder = charset.newDecoder();
             CharBuffer charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
             request = charBuffer.toString();
-            System.out.println("这是http里的请求：" + request);
             if (!isEmpty(request)) {
                 String str = request.substring(0, 10).trim();
                 if (str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST))

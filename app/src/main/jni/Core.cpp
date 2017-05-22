@@ -150,7 +150,7 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
         if (find != string::npos) {
             dhost = hosts.substr(0, find);
             dport = hosts.substr(find + 1);
-            if (dport.compare("80") == 0) {
+            if (dport.compare("443") == 0) {
                 dport = "";
             }
         }

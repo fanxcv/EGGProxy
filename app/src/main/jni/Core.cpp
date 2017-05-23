@@ -46,16 +46,13 @@ Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *env, jobject obj, jstring conf,
     }
     env->ReleaseStringUTFChars(conf, cConf);
 
-    if (_mode.find("net") == 0) {
-        _is_net = 1;
-    } else if (_mode.find("wap_https") == 0) {
-        _all_https = 1;
-    }
+    _is_net = _all_https = 0;
+    if (_mode.find("net") == 0) _is_net = 1;
+    else if (_mode.find("wap_https") == 0) _all_https = 1;
 
-    if (_first_h.find("[K]") != string::npos)
-        _key_h = 1;
-    if (_first_s.find("[K]") != string::npos)
-        _key_s = 1;
+    _key_h = _key_s = 0;
+    if (_first_h.find("[K]") != string::npos) _key_h = 1;
+    if (_first_s.find("[K]") != string::npos) _key_s = 1;
 
     if (_first_h.length() > 1 && _first_s.length() > 1)
         return 1;
@@ -92,8 +89,6 @@ Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *env, jobject obj, jint ty
     if (!init) return 1;
 
     switch (type) {
-        case 0001:
-            return (jboolean) _key_s;
         case ISNET:
             return (jboolean) _is_net;
         case ALLHTTPS:

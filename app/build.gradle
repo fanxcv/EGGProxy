@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+static def releaseTime() {
+    return new Date().format("MMddHHmm", TimeZone.getTimeZone("UTC"))
+}
+
 android {
     signingConfigs {
         Fan {
@@ -14,7 +18,7 @@ android {
     defaultConfig {
         applicationId "cn.EGGMaster"
         minSdkVersion 19
-        targetSdkVersion 22
+        targetSdkVersion 19
         versionCode 1
         versionName "1.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -48,6 +52,13 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.each {
+                output -> output.outputFile = new File(output.outputFile.parent, "EGGProxy-" + buildType.name + "_" + defaultConfig.versionName + "." + defaultConfig.versionCode + "-" + releaseTime() + ".apk");
+            }
     }
 }
 android {

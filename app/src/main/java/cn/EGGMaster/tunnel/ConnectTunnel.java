@@ -69,7 +69,7 @@ public class ConnectTunnel extends Tunnel {
 
     @Override
     public void onReadable(SelectionKey key) {
-        ByteBuffer buffer = DataUtils.getByteBuffer();
+        ByteBuffer buffer = DataUtils.getConnBuffer();
         try {
             int bytesRead = m_InnerChannel.read(buffer);
             if (bytesRead > 0) {
@@ -94,7 +94,7 @@ public class ConnectTunnel extends Tunnel {
             //e.printStackTrace();
             this.dispose();
         } finally {
-            DataUtils.setByteBuffer(buffer);
+            DataUtils.setConnBuffer(buffer);
         }
     }
 

@@ -174,7 +174,8 @@ int startWith(const char *src, const char *str) {
 }
 
 int endWith(const char *src, const char *str) {
-    for (const char *q = src + strlen(src) - 1, *p = str + strlen(str) - 1; q != src-1 && p != str-1; q--, p--)
+    for (const char *q = src + strlen(src) - 1, *p = str + strlen(str) - 1;
+         q != src - 1 && p != str - 1; q--, p--)
         if (*q != *p) return 0;
     return 1;
 }
@@ -188,7 +189,9 @@ void _delHeader(string &src, string const &delstr) {
     while (*spos) {
         spos = strcasestr(spos, del);
         if (!spos) break;
-        if (spos != mpos && *(spos - 1) != '\n') continue;
+        if ((spos != mpos && (*(spos - 1) != '\n' || *(spos + 1) != ':')) &&
+            (spos == mpos && *(spos + 1) != ':'))
+            continue;
         char *epos = spos;
         while NEN(*epos) epos++;
         while INL(*epos) epos++;

@@ -252,35 +252,36 @@ public class LocalVpnService extends VpnService implements Runnable {
 
         Builder builder = new Builder();
         builder.setMtu(1500);
+        builder.addRoute("0.0.0.0", 0);
         builder.setSession("EGGProxyVpn");
         builder.addAddress("26.26.26.2", 32);
         builder.addDnsServer("119.29.29.29");
         builder.addDnsServer("114.114.115.115");
 
-        for (int i = 1; i < 26; i++) {
-            builder.addRoute(i + ".0.0.0", 8);
-        }
-        for (int i = 27; i < 127; i++) {
-            builder.addRoute(i + ".0.0.0", 8);
-        }
-        for (int i = 128; i < 192; i++) {
-            builder.addRoute(i + ".0.0.0", 8);
-        }
-        for (int i = 193; i < 256; i++) {
-            builder.addRoute(i + ".0.0.0", 8);
-        }
-        for (int i = 1; i < 26; i++) {
-            builder.addRoute("26." + i + ".0.0", 16);
-        }
-        for (int i = 27; i < 256; i++) {
-            builder.addRoute("26." + i + ".0.0", 16);
-        }
-        for (int i = 1; i < 168; i++) {
-            builder.addRoute("192." + i + ".0.0", 16);
-        }
-        for (int i = 169; i < 256; i++) {
-            builder.addRoute("192." + i + ".0.0", 16);
-        }
+//        for (int i = 1; i < 26; i++) {
+//            builder.addRoute(i + ".0.0.0", 8);
+//        }
+//        for (int i = 27; i < 127; i++) {
+//            builder.addRoute(i + ".0.0.0", 8);
+//        }
+//        for (int i = 128; i < 192; i++) {
+//            builder.addRoute(i + ".0.0.0", 8);
+//        }
+//        for (int i = 193; i < 256; i++) {
+//            builder.addRoute(i + ".0.0.0", 8);
+//        }
+//        for (int i = 1; i < 26; i++) {
+//            builder.addRoute("26." + i + ".0.0", 16);
+//        }
+//        for (int i = 27; i < 256; i++) {
+//            builder.addRoute("26." + i + ".0.0", 16);
+//        }
+//        for (int i = 1; i < 168; i++) {
+//            builder.addRoute("192." + i + ".0.0", 16);
+//        }
+//        for (int i = 169; i < 256; i++) {
+//            builder.addRoute("192." + i + ".0.0", 16);
+//        }
 
         LOCAL_IP = CommonMethods.ipStringToInt("26.26.26.2");
 

@@ -36,11 +36,11 @@ public class Configer {
      * 读取配置文件生成对象
      */
     public boolean readConf(String conf, String type) {
-        if (isEmpty(conf)) {
-            return false;
-        }
+        if (isEmpty(conf)) return false;
 
         boolean res = JniUtils.loadConf(conf, Integer.parseInt(type));
+
+        if (!res) return false;
 
         isNet = JniUtils.getConfBoolean(StaticVal.ISNET);
         allHttps = JniUtils.getConfBoolean(StaticVal.ALLHTTPS);
@@ -55,6 +55,6 @@ public class Configer {
             String https_port = JniUtils.getConfString(StaticVal.HTTPS_PORT);
             httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
-        return res;
+        return true;
     }
 }

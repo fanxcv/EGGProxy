@@ -69,7 +69,7 @@ public class ConnectTunnel extends Tunnel {
 
     @Override
     public void onReadable(SelectionKey key) {
-        ByteBuffer buffer = DataUtils.getConnBuffer();
+        ByteBuffer buffer = DataUtils.getByteBuffer();
         try {
             int bytesRead = m_InnerChannel.read(buffer);
             if (bytesRead > 0) {
@@ -94,7 +94,7 @@ public class ConnectTunnel extends Tunnel {
             //e.printStackTrace();
             this.dispose();
         } finally {
-            DataUtils.setConnBuffer(buffer);
+            DataUtils.setByteBuffer(buffer);
         }
     }
 
@@ -107,13 +107,9 @@ public class ConnectTunnel extends Tunnel {
     public void onConnectable() {
         try {
             if (m_InnerChannel.finishConnect()) {//连接成功
-                ByteBuffer byteBuffer = DataUtils.getConnBuffer();
-                byteBuffer.put(JniUtils.getCoonHeader(remoteHost, String.valueOf(m_DestAddress.getPort())).getBytes());
-                byteBuffer.flip();
-                if (write(byteBuffer, true)) {
+                if (write(ByteBuffer.wrap(JniUtils.getCoonHeader(remoteHost, String.valueOf(m_DestAddress.getPort())).getBytes()), true)) {
                     beginReceive();
                 }
-                DataUtils.setConnBuffer(byteBuffer);
             } else {//连接失败
                 this.dispose();
             }

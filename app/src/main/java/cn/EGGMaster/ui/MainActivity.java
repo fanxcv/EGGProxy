@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements
 
         changeView();
 
-        initBufferPool(16);
+        initBufferPool(4);
         mCalendar = Calendar.getInstance();
         LocalVpnService.addOnStatusChangedListener(this);
     }

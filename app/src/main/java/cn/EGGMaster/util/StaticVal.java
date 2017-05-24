@@ -1,9 +1,5 @@
 package cn.EGGMaster.util;
 
-/**
- * Created by Fan on 2017/4/19.
- */
-
 public class StaticVal {
     public static final boolean IS_DEBUG = true;
 

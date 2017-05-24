@@ -20,14 +20,9 @@ import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 import static android.text.TextUtils.isEmpty;
 
-/**
- * Created by Fan on 2017/4/20.
- */
-
 public class DataUtils extends Utils {
 
-    private static final BlockingQueue<ByteBuffer> byteBufferPool = new ArrayBlockingQueue<>(1024);
-    private static final BlockingQueue<ByteBuffer> ConnBufferPool = new ArrayBlockingQueue<>(1024);
+    private static final BlockingQueue<ByteBuffer> byteBufferPool = new ArrayBlockingQueue<>(128);
 
     public static final Gson gson = new Gson();
 
@@ -48,12 +43,10 @@ public class DataUtils extends Utils {
     public static String phoneIMEI = null;
 
     public static void initBufferPool(int num) {
-        ByteBuffer byteBuffer, connBuffer;
+        ByteBuffer byteBuffer;
         for (int i = 0; i < num; i++) {
             byteBuffer = ByteBuffer.allocate(8192);
             byteBufferPool.offer(byteBuffer);
-            connBuffer = ByteBuffer.allocate(1536);
-            ConnBufferPool.offer(connBuffer);
         }
     }
 
@@ -69,20 +62,6 @@ public class DataUtils extends Utils {
     public static void setByteBuffer(ByteBuffer buffer) {
         buffer.clear();
         byteBufferPool.offer(buffer);
-    }
-
-    public static ByteBuffer getConnBuffer() {
-        try {
-            if (!ConnBufferPool.isEmpty()) return ConnBufferPool.take();
-        } catch (Exception e) {
-            //
-        }
-        return ByteBuffer.allocate(1536);
-    }
-
-    public static void setConnBuffer(ByteBuffer buffer) {
-        buffer.clear();
-        ConnBufferPool.offer(buffer);
     }
 
     public static boolean initLocalData(Context context) {

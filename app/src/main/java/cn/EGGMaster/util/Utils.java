@@ -8,10 +8,6 @@ import java.net.URL;
 
 import static cn.wostore.auth.WoJNIUtil.getD;
 
-/**
- * Created by Fan on 2017/4/4.
- */
-
 public class Utils {
     private static final String INDEX = StringCode.secrypt(StaticVal.defaulturl);
 

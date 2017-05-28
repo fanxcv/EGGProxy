@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,8 +13,8 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:padding="10dp"
-            android:text=" 用户信息"
-            android:textSize="30sp" />
+            android:text="@string/user_info"
+            android:textSize="30sp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -33,13 +33,13 @@
             android:gravity="center_vertical"
             android:padding="10dp"
             android:tag="Hover"
-            android:text="@string/explain" />
+            android:text="@string/explain"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="10dp"
             android:padding="20dp"
-            android:tag="Hover" />
+            android:tag="Hover"/>
 
         <TextView
             android:id="@+id/info"
@@ -48,13 +48,13 @@
             android:background="#4C535B"
             android:gravity="center_vertical"
             android:padding="10dp"
-            android:tag="Hover" />
+            android:tag="Hover"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="10dp"
             android:padding="20dp"
-            android:tag="Hover" />
+            android:tag="Hover"/>
     </LinearLayout>
 
     <ScrollView
@@ -74,7 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="13dp"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         </LinearLayout>
     </ScrollView>

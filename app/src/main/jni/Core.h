@@ -8,21 +8,9 @@
 #define KEY 100001
 #undef URL
 #define URL 100002
-#undef ISNET
-#define ISNET 100101
-#undef ALLHTTPS
-#define ALLHTTPS 100102
-#undef HTTP_IP
-#define HTTP_IP 100111
-#undef HTTP_PORT
-#define HTTP_PORT 100112
-#undef HTTPS_IP
-#define HTTPS_IP 100121
-#undef HTTPS_PORT
-#define HTTPS_PORT 100122
 
 #undef VERSION
-#define VERSION "1.4"
+#define VERSION "1.5"
 
 #undef DEFAULTKEY
 #define DEFAULTKEY "9b9a999e8a938baf8d908786b49a86"

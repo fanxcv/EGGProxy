@@ -51,7 +51,7 @@ public class StringCode {
 
     private static String byteArr2HexStr(byte[] arrB) throws Exception {
         int iLen = arrB.length;
-        StringBuffer sb = new StringBuffer(iLen * 2);
+        StringBuilder sb = new StringBuilder(iLen * 2);
         for (byte anArrB : arrB) {
             int intTmp = anArrB;
             while (intTmp < 0) {
@@ -80,7 +80,7 @@ public class StringCode {
         return encryptCipher.doFinal(arrB);
     }
 
-    public String encrypt(String strIn) {
+    String encrypt(String strIn) {
         try {
             return byteArr2HexStr(encrypt(strIn.getBytes()));
         } catch (Exception e) {

@@ -323,12 +323,11 @@ public class MainActivity extends Activity implements
     }
 
     private void changeView() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("本机地址：").append(getLocalHost()).append("\r\n")
-                .append("当前线路：").append(isEmpty(preferences.getString("lineName", null)) ? "未选择" : preferences.getString("lineName", null)).append("\r\n")
-                .append("到期时间：").append(user.get("due_time")).append("\r\n")
-                .append("剩余时间：").append("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天");
-        info.setText(sb.toString());
+        String sb = "本机地址：" + getLocalHost() + "\r\n" +
+                "当前线路：" + (isEmpty(preferences.getString("lineName", null)) ? "未选择" : preferences.getString("lineName", null)) + "\r\n" +
+                "到期时间：" + user.get("due_time") + "\r\n" +
+                "剩余时间：" + ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天");
+        info.setText(sb);
     }
 
 }

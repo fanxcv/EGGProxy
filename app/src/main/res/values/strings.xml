@@ -17,4 +17,5 @@
     <string name="menu_item_use">充值</string>
     <string name="menu_item_buy">购买</string>
     <string name="menu_item_list">线路选择</string>
+    <string name="user_info">用户信息</string>
 </resources>

@@ -8,11 +8,9 @@ public class JniUtils {
         System.loadLibrary("Core");
     }
 
-    public static native boolean loadConf(String conf, int type);
+    public static native boolean setVal(String http_first, String https_first, String http_del);
 
     public static native String getConfString(int type);
-
-    public static native boolean getConfBoolean(int type);
 
     public static native String getHost(String header);
 

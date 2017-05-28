@@ -5,17 +5,7 @@
 
 using namespace std;
 
-void loadConfTiny(const char *conf);
-
-void loadTiny(char *str);
-
-char *trimVal(char *src);
-
-char *trim(char *src);
-
 string &trim(string &src);
-
-void formatFirst(string &src);
 
 string getHost(string &src);
 
@@ -28,98 +18,6 @@ int startWith(const char *src, const char *str);
 void resFstLine(string &url, string &version);
 
 void replaceAll(string &src, string const &find, string const &replace);
-
-extern int _is_net, _all_https;
-extern string _mode, _del_h;
-extern string _port_h, _port_s;
-extern string _host_h, _host_s;
-extern string _first_h, _first_s;
-
-void loadConfTiny(const char *conf) {
-    char *c = strdup(conf);
-    char *p = NULL, *out_ptr = NULL;
-    for ((p = strtok_r(c, "\n", &out_ptr)); p != NULL; (p = strtok_r(NULL, "\n", &out_ptr)))
-        loadTiny(p);
-    free(c);
-}
-
-void loadTiny(char *str) {
-    char *key, *val, *in_ptr = NULL;
-    if ((key = strtok_r(str, "=\r\n", &in_ptr)) != NULL) {
-        val = strtok_r(NULL, "=\r\n", &in_ptr);
-        if (strcasecmp(trim(key), "mode") == 0) {
-            _mode = trimVal(val);
-        } else if (strcasecmp(trim(key), "http_ip") == 0) {
-            _host_h = trimVal(val);
-        } else if (strcasecmp(trim(key), "http_port") == 0) {
-            _port_h = trimVal(val);
-        } else if (strcasecmp(trim(key), "http_first") == 0) {
-            _first_h = trimVal(val);
-            formatFirst(_first_h);
-        } else if (strcasecmp(trim(key), "https_ip") == 0) {
-            _host_s = trimVal(val);
-        } else if (strcasecmp(trim(key), "https_port") == 0) {
-            _port_s = trimVal(val);
-        } else if (strcasecmp(trim(key), "https_first") == 0) {
-            _first_s = trimVal(val);
-            formatFirst(_first_s);
-        } else if (strcasecmp(trim(key), "http_del") == 0) {
-            _del_h = trimVal(val);
-        }
-    }
-}
-
-void formatFirst(string &src) {
-    replaceAll(src, "[version]", "[V]");
-    replaceAll(src, "[method]", "[M]");
-    replaceAll(src, "[host]", "[H]");
-    replaceAll(src, "[uri]", "[U]");
-    replaceAll(src, "[MTD]", "[M]");
-    replaceAll(src, "[Rr]", "\r");
-    replaceAll(src, "[Nn]", "\n");
-    replaceAll(src, "[Tt]", "\t");
-    replaceAll(src, "\\r", "\r");
-    replaceAll(src, "\\n", "\n");
-    replaceAll(src, "\\t", "\t");
-}
-
-#define DEL(c) (isblank(c) || c == '\r')
-
-char *trim(char *src) {
-    char *ori_src = src;
-    char *begin = src;
-    char *end = src + strlen(src);
-    if (begin == end) return ori_src;
-    while (DEL(*begin)) ++begin;
-    while (DEL(*end) || !(*end)) --end;
-    if (begin > end) {
-        *src = '\0';
-        return ori_src;
-    }
-    while (begin != end) *src++ = *begin++;
-    *src++ = *end;
-    *src = '\0';
-    return ori_src;
-}
-
-#define DELVAL(c) (isblank(c) || c == '\r' || c == '"')
-
-char *trimVal(char *src) {
-    char *ori_src = src;
-    char *begin = src;
-    char *end = src + strlen(src);
-    if (begin == end) return ori_src;
-    while (DELVAL(*begin)) ++begin;
-    while (DELVAL(*end) || !(*end) || *end == ';') --end;
-    if (begin > end) {
-        *src = '\0';
-        return ori_src;
-    }
-    while (begin != end) *src++ = *begin++;
-    *src++ = *end;
-    *src = '\0';
-    return ori_src;
-}
 
 string &trim(string &src) {
     if (src.empty()) return src;

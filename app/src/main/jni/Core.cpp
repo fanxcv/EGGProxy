@@ -3,8 +3,6 @@
 
 using namespace std;
 
-extern void loadConfTiny(const char *conf);
-
 extern string getHost(string &src);
 
 extern int endWith(const char *src, const char *str);
@@ -18,48 +16,11 @@ extern void resFstLine(string &url, string &version);
 extern void replaceAll(string &src, string const &find, string const &replace);
 
 int init = 0;
-int _is_net, _all_https;
-string _mode, _del_h;
-string _port_h, _port_s;
-string _host_h, _host_s;
+string _del_h;
 string _first_h, _first_s;
 int _key_h = 0, _key_s = 0;
 
 extern "C" {
-
-JNIEXPORT jboolean JNICALL
-Java_cn_EGGMaster_util_JniUtils_loadConf(JNIEnv *env, jobject obj, jstring conf, jint type) {
-    if (!init) return 0;
-
-    const char *cConf = env->GetStringUTFChars(conf, NULL);
-
-    switch (type) {
-        case 0:
-            loadConfTiny(cConf);
-            break;
-        case 1:
-            //loadConfFmns(cConf);
-            break;
-        default:
-            env->ReleaseStringUTFChars(conf, cConf);
-            return 0;
-    }
-    env->ReleaseStringUTFChars(conf, cConf);
-
-    _is_net = _all_https = 0;
-    if (_mode.find("net") == 0) _is_net = 1;
-    else if (_mode.find("wap_https") == 0) _all_https = 1;
-
-    _key_h = _key_s = 0;
-    if (_first_h.find("[K]") != string::npos) _key_h = 1;
-    if (_first_s.find("[K]") != string::npos) _key_s = 1;
-
-    if (_first_h.length() > 1 && _first_s.length() > 1)
-        return 1;
-    else
-        return 0;
-
-}
 
 JNIEXPORT jstring JNICALL
 Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint type) {
@@ -69,14 +30,6 @@ Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint typ
             return env->NewStringUTF(DEFAULTKEY);
         case URL:
             return env->NewStringUTF(DEFAULTURL);
-        case HTTP_IP:
-            return env->NewStringUTF(_host_h.c_str());
-        case HTTP_PORT:
-            return env->NewStringUTF(_port_h.c_str());
-        case HTTPS_IP:
-            return env->NewStringUTF(_host_s.c_str());
-        case HTTPS_PORT:
-            return env->NewStringUTF(_port_s.c_str());
         default:
             break;
     }
@@ -85,18 +38,22 @@ Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint typ
 }
 
 JNIEXPORT jboolean JNICALL
-Java_cn_EGGMaster_util_JniUtils_getConfBoolean(JNIEnv *env, jobject obj, jint type) {
-    if (!init) return 1;
-
-    switch (type) {
-        case ISNET:
-            return (jboolean) _is_net;
-        case ALLHTTPS:
-            return (jboolean) _all_https;
-        default:
-            break;
-    }
-    return 0;
+Java_cn_EGGMaster_util_JniUtils_setVal(JNIEnv *env, jobject obj, jstring http, jstring https,
+                                       jstring del) {
+    if (!init) return 0;
+    const char *c_del = env->GetStringUTFChars(del, NULL);
+    const char *c_http = env->GetStringUTFChars(http, NULL);
+    const char *c_https = env->GetStringUTFChars(https, NULL);
+    _del_h = c_del;
+    _first_h = c_http;
+    _first_s = c_https;
+    _key_h = _key_s = 0;
+    if (_first_h.find("[K]") != string::npos) _key_h = 1;
+    if (_first_s.find("[K]") != string::npos) _key_s = 1;
+    env->ReleaseStringUTFChars(del, c_del);
+    env->ReleaseStringUTFChars(http, c_http);
+    env->ReleaseStringUTFChars(https, c_https);
+    return 1;
 }
 
 JNIEXPORT jstring JNICALL
@@ -107,6 +64,37 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
     string host = getHost(ns);
     env->ReleaseStringUTFChars(str, s);
     return env->NewStringUTF(host.c_str());
+}
+
+void _uniComSupport(JNIEnv *env, string &urls, string &dhost, string &dport,
+                    string &ns) {
+    time_t t_time;
+    string s_time;
+    stringstream stream;
+
+    time(&t_time);
+    stream << t_time;
+    stream >> s_time;
+    s_time += "000";
+
+    jstring a = env->NewStringUTF("13072257727");
+    jstring b = env->NewStringUTF(urls.c_str());
+    jstring c = env->NewStringUTF("00000000000/1");
+    jstring d = env->NewStringUTF(s_time.c_str());
+    jstring e = env->NewStringUTF(dhost.c_str());
+    jstring f = env->NewStringUTF(dport.c_str());
+
+
+    jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
+    jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
+                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
+    const char *c_result = env->GetStringUTFChars(result, NULL);
+
+    replaceAll(ns, "[T]", s_time);
+    replaceAll(ns, "[K]", c_result);
+
+    env->ReleaseStringUTFChars(result, c_result);
 }
 
 JNIEXPORT jstring JNICALL
@@ -126,14 +114,6 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
     }
 
     if (_key_s) {
-        time_t t_time;
-        string s_time;
-        stringstream stream;
-
-        time(&t_time);
-        stream << t_time;
-        stream >> s_time;
-        s_time += "000";
         string urls = "https://";
         if (endWith(hosts.c_str(), ":443"))
             urls += hosts.substr(0, hosts.length() - 4) + "/";
@@ -149,25 +129,7 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
                 dport = "";
             }
         }
-
-        jstring a = env->NewStringUTF("13072257727");
-        jstring b = env->NewStringUTF(urls.c_str());
-        jstring c = env->NewStringUTF("00000000000/1");
-        jstring d = env->NewStringUTF(s_time.c_str());
-        jstring e = env->NewStringUTF(dhost.c_str());
-        jstring f = env->NewStringUTF(dport.c_str());
-
-
-        jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
-        jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
-                                                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
-        const char *c_result = env->GetStringUTFChars(result, NULL);
-
-        replaceAll(ns, "[T]", s_time);
-        replaceAll(ns, "[K]", c_result);
-
-        env->ReleaseStringUTFChars(result, c_result);
+        _uniComSupport(env, urls, dhost, dport, ns);
     }
 
     replaceAll(ns, "[U]", "/");
@@ -214,14 +176,6 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     }
 
     if (_key_h) {
-        time_t t_time;
-        string s_time;
-        stringstream stream;
-
-        time(&t_time);
-        stream << t_time;
-        stream >> s_time;
-        s_time += "000";
         string urls = "http://";
         if (endWith(host.c_str(), ":80"))
             urls += host.substr(0, host.length() - 3) + url;
@@ -237,31 +191,14 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
                 dport = "";
             }
         }
-
-        jstring a = env->NewStringUTF("13072257727");
-        jstring b = env->NewStringUTF(urls.c_str());
-        jstring c = env->NewStringUTF("00000000000/1");
-        jstring d = env->NewStringUTF(s_time.c_str());
-        jstring e = env->NewStringUTF(dhost.c_str());
-        jstring f = env->NewStringUTF(dport.c_str());
-
-        jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
-        jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
-                                                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-        jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
-        const char *c_result = env->GetStringUTFChars(result, NULL);
-
-        replaceAll(ns, "[T]", s_time);
-        replaceAll(ns, "[K]", c_result);
-
-        env->ReleaseStringUTFChars(result, c_result);
+        _uniComSupport(env, urls, dhost, dport, ns);
     }
 
     replaceAll(ns, "[M]", method);
     replaceAll(ns, "[H]", host);
     replaceAll(ns, "[V]", version);
     replaceAll(ns, "[U]", url);
-    ns += cHeader;
+    ns += cHeader + "\r\n";
     //LOGI("HTTP请求 : %s", ns.c_str());
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);

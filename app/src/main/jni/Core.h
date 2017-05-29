@@ -18,7 +18,9 @@
 #define DEFAULTURL "978b8b8fc5d0d089d19a9898868a91d19c91d0bab8b8be8f96d0"
 
 #define LOG_TAG "ndk-test"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
+#define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
+#define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
 
 #ifndef _Included_cn_EGGMaster_util_JniUtils
 #define _Included_cn_EGGMaster_util_JniUtils

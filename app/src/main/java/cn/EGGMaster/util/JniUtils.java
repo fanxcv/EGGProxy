@@ -20,4 +20,6 @@ public class JniUtils {
 
     public static native String initCore(Context context);
 
+    public static native int ecInit(Context context);
+
 }

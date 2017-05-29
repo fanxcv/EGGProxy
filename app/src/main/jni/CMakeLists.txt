@@ -8,6 +8,7 @@ add_library(
     # Sources
     Core.cpp
     Utils.cpp
+    encrypt.cpp
 )
 
 # add system library to build Core

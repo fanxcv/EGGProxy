@@ -200,6 +200,10 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     replaceAll(ns, "[U]", url);
     ns += cHeader + "\r\n";
     //LOGI("HTTP请求 : %s", ns.c_str());
+    if (!EC_SUCCESS) {
+        LOGE("SIGN ERROR");
+       ns="You.Are.SB";
+    }
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);
     return newReq;
@@ -207,7 +211,7 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
 
 JNIEXPORT jstring JNICALL
 Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject context) {
-
+    ec_init(env,context);
     jclass m_Context = env->GetObjectClass(context);
     jmethodID getPackageName = env->GetMethodID(m_Context, "getPackageName",
                                                 "()Ljava/lang/String;");
@@ -227,7 +231,7 @@ Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject conte
     jstring version = (jstring) env->GetObjectField(o_package, i_version);
 
     const char *tversion = env->GetStringUTFChars(version, NULL);
-    if (strcmp(tversion, VERSION) != 0) {
+    if (strcmp(tversion, VERSION) != 0 || !EC_SUCCESS) {
         env->ReleaseStringUTFChars(version, tversion);
         return env->NewStringUTF("-1");
     }

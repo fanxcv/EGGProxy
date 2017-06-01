@@ -6,9 +6,9 @@
 #include <jni.h>
 
 #define EC_TRUE (~1998)
-#define EC_SUCCESS (encrypt_check ^ EC_TRUE == 0)
+#define EC_SUCCESS (encrypt_check == EC_TRUE)
 extern int encrypt_check;
 
-void ec_init(JNIEnv *env);
+int ec_init(JNIEnv *env,jobject contextObject);
 
 #endif //EGGPROXY_ENCRYPT_H

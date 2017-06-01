@@ -2,6 +2,7 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include "encrypt.h"
 /* Header for class cn_EGGMaster_util_JniUtils */
 
 #undef KEY

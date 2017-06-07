@@ -34,6 +34,7 @@ import static android.text.TextUtils.isEmpty;
 import static cn.EGGMaster.util.DataUtils.TYPE;
 import static cn.EGGMaster.util.DataUtils.admin;
 import static cn.EGGMaster.util.DataUtils.app;
+import static cn.EGGMaster.util.DataUtils.appInstallID;
 import static cn.EGGMaster.util.DataUtils.gson;
 import static cn.EGGMaster.util.DataUtils.initBufferPool;
 import static cn.EGGMaster.util.DataUtils.phoneIMEI;
@@ -160,7 +161,7 @@ public class MainActivity extends Activity implements
             runFalse();
             return;
         }
-        String result = Utils.sendPost("getLine", "id=" + id);
+        String result = Utils.sendPost("getLine", "id=" + id, "name=" + phoneIMEI, "pass=" + appInstallID);
         Map<String, String> line = gson.fromJson(StringCode.getInstance().decrypt(result), TYPE);
         if (line != null && Configer.instance.readConf(line.get("value"), line.get("type") + "")) {
             onLogReceived("核心启动成功");

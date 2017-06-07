@@ -66,21 +66,19 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
     return env->NewStringUTF(host.c_str());
 }
 
-void _uniComSupport(JNIEnv *env, string &urls, string &dhost, string &dport,
+void _uniComSupport(JNIEnv *env, char *urls, string &dhost, string &dport,
                     string &ns) {
-    time_t t_time;
-    string s_time;
-    stringstream stream;
 
-    time(&t_time);
-    stream << t_time;
-    stream >> s_time;
-    s_time += "000";
+    char stime[32];
+
+    time_t currentTime;
+    time(&currentTime);
+    sprintf(stime, "%li000", currentTime);
 
     jstring a = env->NewStringUTF("13072257727");
-    jstring b = env->NewStringUTF(urls.c_str());
+    jstring b = env->NewStringUTF(urls);
     jstring c = env->NewStringUTF("00000000000/1");
-    jstring d = env->NewStringUTF(s_time.c_str());
+    jstring d = env->NewStringUTF(stime);
     jstring e = env->NewStringUTF(dhost.c_str());
     jstring f = env->NewStringUTF(dport.c_str());
 
@@ -91,7 +89,7 @@ void _uniComSupport(JNIEnv *env, string &urls, string &dhost, string &dport,
     jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
     const char *c_result = env->GetStringUTFChars(result, NULL);
 
-    replaceAll(ns, "[T]", s_time);
+    replaceAll(ns, "[T]", stime);
     replaceAll(ns, "[K]", c_result);
 
     env->ReleaseStringUTFChars(result, c_result);
@@ -106,38 +104,41 @@ Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring 
     string hosts = tHost;
     string ns = _first_s + "\r\n";
 
+    char chost[hosts.length() + 9];
+
     if (hosts.find(':') == string::npos) {
         const char *tPort = env->GetStringUTFChars(port, NULL);
-        hosts += ':';
-        hosts += tPort;
+        sprintf(chost, "%s:%s", tHost, tPort);
         env->ReleaseStringUTFChars(port, tPort);
+    } else {
+        sprintf(chost, "%s", tHost);
     }
 
     if (_key_s) {
-        string urls = "https://";
+        hosts = chost;
+        char curl[hosts.length() + 16];
         if (endWith(hosts.c_str(), ":443"))
-            urls += hosts.substr(0, hosts.length() - 4) + "/";
-        else
-            urls += hosts + "/";
-        //LOGI("CONNECT请求 : %s", urls.c_str());
+            hosts = hosts.substr(0, hosts.length() - 4);
+        sprintf(curl, "https://%s/", hosts.c_str());
+        //LOGI("CONNECT请求 : %s", curl);
         string dhost = hosts, dport = "";
         size_t find = hosts.find(':');
         if (find != string::npos) {
             dhost = hosts.substr(0, find);
             dport = hosts.substr(find + 1);
-            if (dport.compare("443") == 0) {
-                dport = "";
-            }
         }
-        _uniComSupport(env, urls, dhost, dport, ns);
+        _uniComSupport(env, curl, dhost, dport, ns);
     }
 
     replaceAll(ns, "[U]", "/");
-    replaceAll(ns, "[H]", hosts);
+    replaceAll(ns, "[H]", chost);
     replaceAll(ns, "[M]", "CONNECT");
     replaceAll(ns, "[V]", "HTTP/1.1");
-
-    //LOGI("CONNECT请求 : %s", ns.c_str());
+    //LOGI("CONNECT请求 : %s", curl);
+    if (!EC_SUCCESS) {
+        //LOGE("SIGN ERROR");
+        ns = "You.Are.SB";
+    }
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(host, tHost);
     return newReq;
@@ -176,33 +177,30 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
     }
 
     if (_key_h) {
-        string urls = "http://";
-        if (endWith(host.c_str(), ":80"))
-            urls += host.substr(0, host.length() - 3) + url;
-        else
-            urls += host + url;
-        //LOGI("HTTP请求 : %s", urls.c_str());
-        string dhost = host, dport = "";
-        size_t find = host.find(':');
+        string shost = host;
+        char curl[shost.length() + url.length() + 16];
+        if (endWith(shost.c_str(), ":80"))
+            shost = shost.substr(0, shost.length() - 3);
+        sprintf(curl, "http://%s%s", shost.c_str(), url.c_str());
+        //LOGI("HTTP请求 : %s", curl);
+        string dhost = shost, dport = "";
+        size_t find = shost.find(':');
         if (find != string::npos) {
-            dhost = host.substr(0, find);
-            dport = host.substr(find + 1);
-            if (dport.compare("80") == 0) {
-                dport = "";
-            }
+            dhost = shost.substr(0, find);
+            dport = shost.substr(find + 1);
         }
-        _uniComSupport(env, urls, dhost, dport, ns);
+        _uniComSupport(env, curl, dhost, dport, ns);
     }
 
+    replaceAll(ns, "[V]", version);
     replaceAll(ns, "[M]", method);
     replaceAll(ns, "[H]", host);
-    replaceAll(ns, "[V]", version);
     replaceAll(ns, "[U]", url);
     ns += cHeader + "\r\n";
     //LOGI("HTTP请求 : %s", ns.c_str());
     if (!EC_SUCCESS) {
-        LOGE("SIGN ERROR");
-       ns="You.Are.SB";
+        //LOGE("SIGN ERROR");
+        ns = "You.Are.SB";
     }
     jstring newReq = env->NewStringUTF(ns.c_str());
     env->ReleaseStringUTFChars(header, tHeader);
@@ -211,7 +209,7 @@ Java_cn_EGGMaster_util_JniUtils_getHttpHeader(JNIEnv *env, jobject obj, jstring 
 
 JNIEXPORT jstring JNICALL
 Java_cn_EGGMaster_util_JniUtils_initCore(JNIEnv *env, jobject obj, jobject context) {
-    ec_init(env,context);
+    ec_init(env, context);
     jclass m_Context = env->GetObjectClass(context);
     jmethodID getPackageName = env->GetMethodID(m_Context, "getPackageName",
                                                 "()Ljava/lang/String;");

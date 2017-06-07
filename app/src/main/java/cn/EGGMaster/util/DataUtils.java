@@ -37,8 +37,8 @@ public class DataUtils extends Utils {
 
     public static String APP_KEY = null;
 
-    private static String appInstallID = null;
     private static String phoneNumber = null;
+    public static String appInstallID = null;
     public static String versionName = null;
     public static String phoneIMEI = null;
 

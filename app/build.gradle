@@ -49,7 +49,7 @@ android {
     android.applicationVariants.all {
         variant ->
             variant.outputs.each {
-                output -> output.outputFile = new File(output.outputFile.parent, "EGGProxy-" + buildType.name + "_" + defaultConfig.versionName + "." + defaultConfig.versionCode + "-" + releaseTime() + ".apk");
+                output -> output.outputFile = new File(output.outputFile.parent, "EGG Pro-" + buildType.name + "_" + defaultConfig.versionName + "." + defaultConfig.versionCode + "-" + releaseTime() + ".apk");
             }
     }
 }

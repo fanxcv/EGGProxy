@@ -10,15 +10,17 @@ import static android.text.TextUtils.isEmpty;
 public class Configer {
 
     private String mode = "wap";
+    public static boolean U_H_S = false;
+    public static boolean U_S_S = false;
 
     private String http_ip;
-    private String http_port;
     private String http_del;
-    private String http_first;
+    private String http_port;
+    public static String http_first;
 
     private String https_ip;
     private String https_port;
-    private String https_first;
+    public static String https_first;
 
     static boolean isNet = false;
     static boolean allHttps = false;
@@ -49,7 +51,7 @@ public class Configer {
         if (isEmpty(conf)) {
             return false;
         }
-        String[] lines = conf.split("\\n");
+        String[] lines = conf.split("\\r\\n");
         switch (type) {
             case "0":
                 for (String line : lines) {
@@ -110,7 +112,8 @@ public class Configer {
                                 https_port = "80";
                             }
                     } else if (line.contains("[MTD]")) {
-                        http_first = genericFirstLine(formatString(line + "\\r\\n"));
+                        if (line.contains("[K]"))
+                            http_first = genericFirstLine(formatString(line + "\\r\\n"));
                     } else if (line.contains("CONNECT")) {
                         https_first = genericFirstLine(formatString(line + "\\r\\n"));
                     }
@@ -131,7 +134,11 @@ public class Configer {
         if (!isEmpty(https_ip)) {
             httpsAddress = new InetSocketAddress(https_ip, Integer.parseInt(https_port));
         }
-        return JniUtils.setVal(http_first, https_first, http_del) && !(isEmpty(http_first) || isEmpty(https_first));
+
+        U_H_S = !isEmpty(http_first) && http_first.contains("[K]");
+        U_S_S = !isEmpty(https_first) && https_first.contains("[K]");
+
+        return !(isEmpty(http_first) || isEmpty(https_first) || !JniUtils.setVal(http_del));
     }
 
     private String formatString(String str) {

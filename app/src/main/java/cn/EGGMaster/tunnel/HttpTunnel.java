@@ -8,11 +8,13 @@ import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
+import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.util.JniUtils;
+import cn.EGGMaster.util.Utils;
 
 import static android.text.TextUtils.isEmpty;
-import static cn.EGGMaster.util.StaticVal.METHOD_GET;
-import static cn.EGGMaster.util.StaticVal.METHOD_POST;
+import static cn.EGGMaster.core.Configer.U_H_S;
+import static cn.EGGMaster.util.Utils.log;
 
 public class HttpTunnel extends Tunnel {
 
@@ -22,7 +24,7 @@ public class HttpTunnel extends Tunnel {
 
     @Override
     protected boolean write(ByteBuffer buffer, boolean copyRemainData) throws Exception {
-        ByteBuffer m_Buffer = headerProcess(buffer);
+        ByteBuffer m_Buffer = HeaderProcess(buffer);
         int bytesSent;
         while (m_Buffer.hasRemaining()) {
             bytesSent = m_InnerChannel.write(m_Buffer);
@@ -48,21 +50,37 @@ public class HttpTunnel extends Tunnel {
         }
     }
 
-    private ByteBuffer headerProcess(ByteBuffer buffer) {
-        String request;
+    private ByteBuffer HeaderProcess(ByteBuffer buffer) {
         try {
+            String request;
             Charset charset = Charset.forName("UTF-8");
             CharsetDecoder decoder = charset.newDecoder();
             CharBuffer charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
             request = charBuffer.toString();
             if (!isEmpty(request)) {
-                String str = request.substring(0, 10).trim();
-                if (str.startsWith(METHOD_GET) || str.startsWith(METHOD_POST))
-                    return ByteBuffer.wrap(JniUtils.getHttpHeader(request).getBytes());
+                String[] headers = JniUtils.getHttpHeader(request);
+                String format = Configer.http_first;
+                StringBuilder header = new StringBuilder();
+                if (U_H_S) {
+                    String url = "http://" + headers[1] + headers[0];
+                    if (headers[1].endsWith(":80"))
+                        url = "http://" + headers[1].substring(0, headers[1].length() - 3) + headers[0];
+                    String time = String.valueOf(System.currentTimeMillis()).substring(0, 10) + "000";
+                    format = format.replaceAll("\\[K\\]", Utils.getKey(url, time))
+                            .replaceAll("\\[T\\]", time);
+                }
+                header.append(format.replaceAll("\\[M\\]", headers[2])
+                        .replaceAll("\\[V\\]", headers[3])
+                        .replaceAll("\\[H\\]", headers[1])
+                        .replaceAll("\\[U\\]", headers[0]))
+                        .append(headers[4]).append("\r\n");
+                log(header.toString());
+                return ByteBuffer.wrap(header.toString().getBytes());
             }
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return buffer;
         }
         return buffer;
     }
+
 }

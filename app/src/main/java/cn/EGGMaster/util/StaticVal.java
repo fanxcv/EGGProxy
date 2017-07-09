@@ -1,14 +1,14 @@
 package cn.EGGMaster.util;
 
 public class StaticVal {
-    public static final boolean IS_DEBUG = true;
+    public static final boolean IS_DEBUG = false;
 
     //JNI对应的数据
     public static final int KEY = 100001;
     public static final int URL = 100002;
 
-    public static final String METHOD_GET = "GET";
-    public static final String METHOD_POST = "POST";
+    //public static final String METHOD_GET = "GET";
+    //public static final String METHOD_POST = "POST";
 
     //aes加密key
     public static String defaultkey;

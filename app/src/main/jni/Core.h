@@ -11,7 +11,7 @@
 #define URL 100002
 
 #undef VERSION
-#define VERSION "1.6"
+#define VERSION "1.7"
 
 #undef DEFAULTKEY
 #define DEFAULTKEY "9b9a999e8a938baf8d908786b49a86"

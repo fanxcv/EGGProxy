@@ -1,22 +1,26 @@
 package cn.EGGMaster.util;
 
+import android.net.Uri;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static cn.EGGMaster.util.StaticVal.IS_DEBUG;
 import static cn.wostore.auth.WoJNIUtil.getD;
 
 public class Utils {
     private static final String INDEX = StringCode.secrypt(StaticVal.defaulturl);
 
-    private static String getKey(String a, String b, String c, String d, String e, String f) {
-        return getD(a, b, c, d, e, f);
-//        Uri parse = Uri.parse(url);
-//        String host = parse.getHost();
-//        String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
-//        return getD("13072257727", url, "00000000000/1", time, host, port);
+    public static String getKey(String url, String time) {
+        log(url);
+        Uri parse = Uri.parse(url);
+        String host = parse.getHost();
+        String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
+        return getD("13072257727", url, "00000000000/1", time, host, port);
     }
 
     private static String sendPosts(String url, String param) {
@@ -30,7 +34,7 @@ public class Utils {
         String result = "";
         PrintWriter out = null;
         BufferedReader in = null;
-        StringBuffer strs = new StringBuffer();
+        StringBuilder strs = new StringBuilder();
         try {
             URL realUrl = new URL(INDEX + url);
             // 打开和URL之间的连接
@@ -69,5 +73,10 @@ public class Utils {
             }
         }
         return result;
+    }
+
+    public static void log(String log) {
+        if (IS_DEBUG)
+            Log.d("EGGLOG", log);
     }
 }

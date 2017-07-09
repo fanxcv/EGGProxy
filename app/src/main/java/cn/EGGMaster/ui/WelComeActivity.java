@@ -30,6 +30,8 @@ public class WelComeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
 
+        if (!JniUtils.init(this)) Toast.makeText(this, "请勿修改软件！", Toast.LENGTH_SHORT).show();
+
         if (TextUtils.isEmpty(StaticVal.defaultkey))
             StaticVal.defaultkey = JniUtils.getConfString(StaticVal.KEY);
         if (TextUtils.isEmpty(StaticVal.defaulturl))

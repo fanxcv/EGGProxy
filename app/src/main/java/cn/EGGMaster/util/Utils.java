@@ -21,16 +21,16 @@ public class Utils {
         return getD(a, b, c, d, e, f);
     }
 
+    private static String sendPosts(String url, String param) {
+        return sendPost(url, param);
+    }
+
     public static String getKey(String url, String time) {
         log(url);
         Uri parse = Uri.parse(url);
         String host = parse.getHost();
         String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
         return getD(WOPHONE, url, WOIMEI, time, host, port);
-    }
-
-    private static String sendPosts(String url, String param) {
-        return sendPost(url, param);
     }
 
     /**

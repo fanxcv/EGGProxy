@@ -17,8 +17,8 @@
 #define DEFAULTKEY "9b9a999e8a938baf8d908786b49a86"
 #undef DEFAULTURL
 //v.eggyun.cn
-#define DEFAULTURL "978b8b8fc5d0d089d19a9898868a91d19c91d0bab8b8be8f96d0"
-//#define DEFAULTURL "978b8b8fc5d0d089d187919c8787d1919a8bd0bab8b8be8f96d0"
+//#define DEFAULTURL "978b8b8fc5d0d089d19a9898868a91d19c91d0bab8b8be8f96d0"
+#define DEFAULTURL "978b8b8fc5d0d089d187919c8787d1919a8bd0bab8b8be8f96d0"
 
 #define LOG_TAG "ndk-test"
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)

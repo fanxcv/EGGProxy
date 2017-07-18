@@ -4,15 +4,11 @@ using namespace std;
 
 extern string getHost(string &src);
 
-extern int endWith(const char *src, const char *str);
-
 extern int startWith(const char *src, const char *str);
 
 extern void delHeader(string &src, string const &_ds);
 
 extern void resFstLine(string &url, string &version);
-
-extern void replaceAll(string &src, string const &find, string const &replace);
 
 int init = 0;
 string _del_h;
@@ -53,34 +49,6 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
     string host = getHost(ns);
     env->ReleaseStringUTFChars(str, s);
     return env->NewStringUTF(host.c_str());
-}
-
-void _uniComSupport(JNIEnv *env, char *urls, string &dhost, string &dport, string &ns) {
-
-    char stime[32];
-
-    time_t currentTime;
-    time(&currentTime);
-    sprintf(stime, "%li000", currentTime);
-
-    jstring a = env->NewStringUTF("13072257727");
-    jstring b = env->NewStringUTF(urls);
-    jstring c = env->NewStringUTF("00000000000/1");
-    jstring d = env->NewStringUTF(stime);
-    jstring e = env->NewStringUTF(dhost.c_str());
-    jstring f = env->NewStringUTF(dport.c_str());
-
-
-    jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
-    jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
-                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-    jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
-    const char *c_result = env->GetStringUTFChars(result, NULL);
-
-    replaceAll(ns, "[T]", stime);
-    replaceAll(ns, "[K]", c_result);
-
-    env->ReleaseStringUTFChars(result, c_result);
 }
 
 JNIEXPORT jobjectArray JNICALL

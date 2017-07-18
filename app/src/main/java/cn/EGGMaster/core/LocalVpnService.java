@@ -1,6 +1,8 @@
 package cn.EGGMaster.core;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.Handler;
@@ -163,7 +165,7 @@ public class LocalVpnService extends VpnService implements Runnable {
                         onIPPacketReceived(m_IPHeader, size);
                         idle = false;
                     } catch (IOException ex) {
-                        //
+                        dispose();
                     }
                 }
                 if (idle) {
@@ -307,14 +309,14 @@ public class LocalVpnService extends VpnService implements Runnable {
         builder.setConfigureIntent(pendingIntent);
 
         ParcelFileDescriptor pfdDescriptor = builder.establish();
-        onStatusChanged("VPN" + getString(R.string.vpn_connected_status), true);
+        onStatusChanged(getString(R.string.app_name) + getString(R.string.vpn_connected_status), true);
         return pfdDescriptor;
     }
 
     public synchronized void dispose() {
 
-        onStatusChanged("VPN" + getString(R.string.vpn_disconnected_status), false);
-
+        onStatusChanged(getString(R.string.app_name) + getString(R.string.vpn_disconnected_status), false);
+        deleteIconToStatusbar();
         IsRunning = false;
 
         try {
@@ -344,6 +346,7 @@ public class LocalVpnService extends VpnService implements Runnable {
     @Override
     public void onDestroy() {
         if (IsRunning) dispose();
+        deleteIconToStatusbar();
         try {
             // ֹͣTcpServer
             if (m_TcpProxyServer != null) {
@@ -369,6 +372,11 @@ public class LocalVpnService extends VpnService implements Runnable {
         void onStatusChanged(String status, Boolean isRunning);
 
         void onLogReceived(String logString);
+    }
+
+    private void deleteIconToStatusbar() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(R.drawable.ic_launcher);
     }
 
 }

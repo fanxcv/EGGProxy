@@ -14,13 +14,15 @@ import static cn.wostore.auth.WoJNIUtil.getD;
 
 public class Utils {
     private static final String INDEX = StringCode.secrypt(StaticVal.defaulturl);
+    private static final String WOPHONE = StringCode.secrypt(StaticVal.WOPHONE);
+    private static final String WOIMEI = StringCode.secrypt(StaticVal.WOIMEI);
 
     public static String getKey(String url, String time) {
         log(url);
         Uri parse = Uri.parse(url);
         String host = parse.getHost();
         String port = (parse.getPort() == -1 || parse.getPort() == 80 || parse.getPort() == 443) ? "" : String.valueOf(parse.getPort());
-        return getD("13072257727", url, "00000000000/1", time, host, port);
+        return getD(WOPHONE, url, WOIMEI, time, host, port);
     }
 
     private static String sendPosts(String url, String param) {

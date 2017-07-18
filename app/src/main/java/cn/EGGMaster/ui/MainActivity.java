@@ -3,6 +3,10 @@ package cn.EGGMaster.ui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -134,8 +138,10 @@ public class MainActivity extends Activity implements
                         Intent intent = LocalVpnService.prepare(this);
                         if (intent == null) {
                             startVPNService();
+                            addIconToStatusbar();
                         } else {
                             startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
+                            addIconToStatusbar();
                         }
                     } else {
                         LocalVpnService.IsRunning = false;
@@ -329,6 +335,29 @@ public class MainActivity extends Activity implements
                 "到期时间：" + user.get("due_time") + "\r\n" +
                 "剩余时间：" + ("timeError".equals(user.get("time")) ? "账号归属错误" : (user.get("time")) + "天");
         info.setText(sb);
+    }
+
+    //如果没有从状态栏中删除ICON，且继续调用addIconToStatusbar,则不会有任何变化.如果将notification中的resId设置不同的图标，则会显示不同的图标
+    private void addIconToStatusbar() {
+        //long[] vibrate = new long[]{0, 500, 1000, 1500};
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        PendingIntent pending = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification.Builder builder = new Notification.Builder(MainActivity.this);
+
+        builder.setSmallIcon(R.drawable.ic_launcher)// 设置图标
+                .setWhen(System.currentTimeMillis())// 设置通知来到的时间
+                .setContentTitle(getString(R.string.app_name))// 设置通知的标题
+                .setContentText(getString(R.string.app_name) + "已连接")// 设置通知的内容
+                .setTicker(getString(R.string.app_name) + "正在运行。。。")// 状态栏上显示
+                .setContentIntent(pending)//设置点击事件
+                //.setVibrate(vibrate)//设置震动
+                .setOngoing(true);
+        Notification notification = builder.build();
+
+        notification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+
+        notificationManager.notify(R.drawable.ic_launcher, notification);
     }
 
 }

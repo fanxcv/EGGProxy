@@ -11,9 +11,13 @@ string getHost(string &src);
 
 void delHeader(string &src, string const &_ds);
 
+int endWith(const char *src, const char *str);
+
 int startWith(const char *src, const char *str);
 
 void resFstLine(string &url, string &version);
+
+void replaceAll(string &src, string const &find, string const &replace);
 
 string &trim(string &src) {
     if (src.empty()) return src;
@@ -21,6 +25,14 @@ string &trim(string &src) {
     src.erase(0, src.find_first_not_of(" "));
     src.erase(src.find_last_not_of(" ") + 1);
     return src;
+}
+
+void replaceAll(string &src, string const &find, string const &replace) {
+    string::size_type pos = src.find(find), f_size = find.size(), r_size = replace.size();
+    while (pos != string::npos) {
+        src.replace(pos, f_size, replace);
+        pos = src.find(find, pos + r_size);
+    }
 }
 
 string getHost(string &src) {
@@ -56,6 +68,13 @@ void resFstLine(string &url, string &version) {
 int startWith(const char *src, const char *str) {
     for (; *src != '\0' && *str != '\0'; src++, str++)
         if (*src != *str) return 0;
+    return 1;
+}
+
+int endWith(const char *src, const char *str) {
+    for (const char *q = src + strlen(src) - 1, *p = str + strlen(str) - 1;
+         q != src - 1 && p != str - 1; q--, p--)
+        if (*q != *p) return 0;
     return 1;
 }
 

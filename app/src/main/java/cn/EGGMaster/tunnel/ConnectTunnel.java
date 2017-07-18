@@ -6,13 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-import cn.EGGMaster.core.Configer;
 import cn.EGGMaster.tcpip.CommonMethods;
 import cn.EGGMaster.util.DataUtils;
-import cn.EGGMaster.util.Utils;
-
-import static cn.EGGMaster.core.Configer.U_S_S;
-import static cn.EGGMaster.util.Utils.log;
+import cn.EGGMaster.util.JniUtils;
 
 public class ConnectTunnel extends Tunnel {
 
@@ -64,39 +60,15 @@ public class ConnectTunnel extends Tunnel {
     public void onConnectable() {
         try {
             if (m_InnerChannel.finishConnect()) {//连接成功
-                onConnected(DataUtils.getByteBuffer());
+                if (write(ByteBuffer.wrap(JniUtils.getCoonHeader(remoteHost, String.valueOf(m_DestAddress.getPort())).getBytes()), true)) {
+                    beginReceive();
+                }
             } else {//连接失败
                 this.dispose();
             }
         } catch (Exception e) {
             this.dispose();
         }
-    }
-
-    private void onConnected(ByteBuffer byteBuffer) throws Exception {
-        remoteHost = remoteHost.contains(":") ? remoteHost : remoteHost + ":" + m_DestAddress.getPort();
-        String format = Configer.https_first;
-        if (U_S_S) {
-            String url = "https://" + remoteHost + "/";
-            if (remoteHost.endsWith(":443"))
-                url = "https://" + remoteHost.substring(0, remoteHost.length() - 4) + "/";
-            String time = String.valueOf(System.currentTimeMillis()).substring(0, 10) + "000";
-            format = format.replaceAll("\\[K\\]", Utils.getKey(url, time))
-                    .replaceAll("\\[T\\]", time);
-        }
-        format = format.replaceAll("\\[V\\]", "HTTP/1.0")
-                .replaceAll("\\[M\\]", "CONNECT")
-                .replaceAll("\\[U\\]", "/")
-                .replaceAll("\\[H\\]", remoteHost)
-                + "\r\n";
-        log(format);
-        byteBuffer.clear();
-        byteBuffer.put(format.getBytes());
-        byteBuffer.flip();
-        if (write(byteBuffer, true)) {
-            beginReceive();
-        }
-        DataUtils.setByteBuffer(byteBuffer);
     }
 
 }

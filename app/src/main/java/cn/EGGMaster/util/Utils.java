@@ -17,6 +17,10 @@ public class Utils {
     private static final String WOPHONE = StringCode.secrypt(StaticVal.WOPHONE);
     private static final String WOIMEI = StringCode.secrypt(StaticVal.WOIMEI);
 
+    private static String getKey(String a, String b, String c, String d, String e, String f) {
+        return getD(a, b, c, d, e, f);
+    }
+
     public static String getKey(String url, String time) {
         log(url);
         Uri parse = Uri.parse(url);

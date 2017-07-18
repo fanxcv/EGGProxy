@@ -4,14 +4,20 @@ using namespace std;
 
 extern string getHost(string &src);
 
+extern int endWith(const char *src, const char *str);
+
 extern int startWith(const char *src, const char *str);
 
 extern void delHeader(string &src, string const &_ds);
 
 extern void resFstLine(string &url, string &version);
 
+extern void replaceAll(string &src, string const &find, string const &replace);
+
 int init = 0;
 string _del_h;
+string _first_s;
+int _key_s = 0;
 
 extern "C" {
 
@@ -33,11 +39,16 @@ Java_cn_EGGMaster_util_JniUtils_getConfString(JNIEnv *env, jobject obj, jint typ
 }
 
 JNIEXPORT jboolean JNICALL
-Java_cn_EGGMaster_util_JniUtils_setVal(JNIEnv *env, jobject obj, jstring del) {
+Java_cn_EGGMaster_util_JniUtils_setVal(JNIEnv *env, jobject obj, jstring del, jstring https) {
     if (!init) return 0;
     const char *c_del = env->GetStringUTFChars(del, NULL);
+    const char *c_https = env->GetStringUTFChars(https, NULL);
+    _key_s = 0;
     _del_h = c_del;
+    _first_s = c_https;
+    if (_first_s.find("[K]") != string::npos) _key_s = 1;
     env->ReleaseStringUTFChars(del, c_del);
+    env->ReleaseStringUTFChars(https, c_https);
     return 1;
 }
 
@@ -49,6 +60,84 @@ Java_cn_EGGMaster_util_JniUtils_getHost(JNIEnv *env, jobject obj, jstring str) {
     string host = getHost(ns);
     env->ReleaseStringUTFChars(str, s);
     return env->NewStringUTF(host.c_str());
+}
+
+void _uniComSupport(JNIEnv *env, char *urls, string &dhost, string &dport,
+                    string &ns) {
+
+    char stime[32];
+
+    time_t currentTime;
+    time(&currentTime);
+    sprintf(stime, "%li000", currentTime);
+
+    jstring a = env->NewStringUTF("13072257727");
+    jstring b = env->NewStringUTF(urls);
+    jstring c = env->NewStringUTF("00000000000/1");
+    jstring d = env->NewStringUTF(stime);
+    jstring e = env->NewStringUTF(dhost.c_str());
+    jstring f = env->NewStringUTF(dport.c_str());
+
+
+    jclass c_utils = env->FindClass("cn/EGGMaster/util/Utils");
+    jmethodID m_getKey = env->GetStaticMethodID(c_utils, "getKey",
+                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jstring result = (jstring) env->CallStaticObjectMethod(c_utils, m_getKey, a, b, c, d, e, f);
+    const char *c_result = env->GetStringUTFChars(result, NULL);
+
+    replaceAll(ns, "[T]", stime);
+    replaceAll(ns, "[K]", c_result);
+
+    env->ReleaseStringUTFChars(result, c_result);
+}
+
+JNIEXPORT jstring JNICALL
+Java_cn_EGGMaster_util_JniUtils_getCoonHeader(JNIEnv *env, jobject obj, jstring host,
+                                              jstring port) {
+
+    const char *tHost = env->GetStringUTFChars(host, NULL);
+
+    string hosts = tHost;
+    string ns = _first_s + "\r\n";
+
+    char chost[hosts.length() + 9];
+
+    if (hosts.find(':') == string::npos) {
+        const char *tPort = env->GetStringUTFChars(port, NULL);
+        sprintf(chost, "%s:%s", tHost, tPort);
+        env->ReleaseStringUTFChars(port, tPort);
+    } else {
+        sprintf(chost, "%s", tHost);
+    }
+
+    if (_key_s) {
+        hosts = chost;
+        char curl[hosts.length() + 16];
+        if (endWith(hosts.c_str(), ":443"))
+            hosts = hosts.substr(0, hosts.length() - 4);
+        sprintf(curl, "https://%s/", hosts.c_str());
+        //LOGI("CONNECT请求 : %s", curl);
+        string dhost = hosts, dport = "";
+        size_t find = hosts.find(':');
+        if (find != string::npos) {
+            dhost = hosts.substr(0, find);
+            dport = hosts.substr(find + 1);
+        }
+        _uniComSupport(env, curl, dhost, dport, ns);
+    }
+
+    replaceAll(ns, "[U]", "/");
+    replaceAll(ns, "[H]", chost);
+    replaceAll(ns, "[M]", "CONNECT");
+    replaceAll(ns, "[V]", "HTTP/1.1");
+    //LOGI("CONNECT请求 : %s", curl);
+    if (!EC_SUCCESS) {
+        //LOGE("SIGN ERROR");
+        ns = "You.Are.SB";
+    }
+    jstring newReq = env->NewStringUTF(ns.c_str());
+    env->ReleaseStringUTFChars(host, tHost);
+    return newReq;
 }
 
 JNIEXPORT jobjectArray JNICALL

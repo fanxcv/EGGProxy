@@ -11,7 +11,7 @@ public class Configer {
 
     private String mode = "wap";
     public static boolean U_H_S = false;
-    public static boolean U_S_S = false;
+    //public static boolean U_S_S = false;
 
     private String http_ip;
     private String http_del;
@@ -20,7 +20,7 @@ public class Configer {
 
     private String https_ip;
     private String https_port;
-    public static String https_first;
+    private static String https_first;
 
     static boolean isNet = false;
     static boolean allHttps = false;
@@ -136,9 +136,9 @@ public class Configer {
         }
 
         U_H_S = !isEmpty(http_first) && http_first.contains("[K]");
-        U_S_S = !isEmpty(https_first) && https_first.contains("[K]");
+        //U_S_S = !isEmpty(https_first) && https_first.contains("[K]");
 
-        return !(isEmpty(http_first) || isEmpty(https_first) || !JniUtils.setVal(http_del));
+        return !(isEmpty(http_first) || isEmpty(https_first) || !JniUtils.setVal(http_del, https_first));
     }
 
     private String formatString(String str) {
